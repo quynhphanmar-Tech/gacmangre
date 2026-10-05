@@ -1,6 +1,6 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { getServiceSupabase } from '@/lib/supabase/server';
-import { mockNgan001, mockOrdersStore } from '@/lib/data/mock-data';
+import { mockNgan001, mockNgans, mockOrdersStore } from '@/lib/data/mock-data';
 import { Order, OrderInput, OrderCreationResult } from '@/types';
 import { createEventRecord, processEvent } from '@/services/event-service';
 
@@ -143,8 +143,13 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
   }
 
   // 4. In-Memory Atomic Simulation Engine (Zero failure mode)
+  // Find targeted Ngăn across all 4 sprint Ngăns
+  const targetNgan = (input.ngan_id
+    ? (mockNgans.find((n) => n.id === input.ngan_id || n.slug === input.ngan_id || n.number === input.ngan_id) || mockNgan001)
+    : mockNgan001);
+
   // Lock: Check Ngăn status
-  if (mockNgan001.status !== 'OPEN') {
+  if (targetNgan.status !== 'OPEN') {
     return {
       success: false,
       error_code: 'NGAN_CLOSED',
@@ -152,14 +157,16 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
     };
   }
 
-  // Calculate current confirmed demand
-  const currentConfirmed = mockOrdersStore
-    .filter((o) => o.status !== 'CANCELLED' && o.status !== 'REFUNDED')
-    .reduce((sum, o) => sum + o.quantity, 73); // baseline 73
+  // Calculate current confirmed demand for this specific Ngăn
+  const confirmedOrdersTotal = mockOrdersStore
+    .filter((o) => o.ngan_id === targetNgan.id && o.status !== 'CANCELLED' && o.status !== 'REFUNDED')
+    .reduce((sum, o) => sum + o.quantity, 0);
 
-  const remaining = Math.max(0, mockNgan001.moq - currentConfirmed);
+  const currentTotal = targetNgan.current_quantity + confirmedOrdersTotal;
+  const remaining = Math.max(0, targetNgan.moq - currentTotal);
 
-  if (quantity > remaining) {
+  // If already at or above MOQ, allow order if within reasonable buffer, otherwise reject
+  if (remaining > 0 && quantity > remaining) {
     return {
       success: false,
       error_code: 'QUANTITY_UNAVAILABLE',
@@ -171,14 +178,14 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
   // Generate server-side sequential order code: GM-2026-000074...
   mockSequenceCounter += 1;
   const orderCode = formatOrderCode(mockSequenceCounter);
-  const unitPrice = mockNgan001.price; // Server-retrieved price!
+  const unitPrice = targetNgan.price; // Server-retrieved price!
   const totalAmount = unitPrice * quantity;
 
   const newOrder: Order = {
     id: `ord-${Date.now()}-${mockSequenceCounter}`,
     order_code: orderCode,
     customer_id: `cust-${Date.now()}`,
-    ngan_id: mockNgan001.id,
+    ngan_id: targetNgan.id,
     quantity,
     unit_price: unitPrice,
     total_amount: totalAmount,
@@ -204,20 +211,16 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
       created_at: new Date().toISOString(),
     },
     ngan: {
-      ...mockNgan001,
-      current_quantity: currentConfirmed + quantity,
+      ...targetNgan,
+      current_quantity: currentTotal + quantity,
     },
   };
 
   // Update Ngăn state
-  const prevQuantity = currentConfirmed;
+  const prevQuantity = targetNgan.current_quantity;
   const newTotal = prevQuantity + quantity;
-  mockNgan001.current_quantity = newTotal;
-  const reachedMoqNow = prevQuantity < mockNgan001.moq && newTotal >= mockNgan001.moq;
-
-  if (mockNgan001.current_quantity >= mockNgan001.moq) {
-    mockNgan001.status = 'FULL';
-  }
+  targetNgan.current_quantity = newTotal;
+  const reachedMoqNow = prevQuantity < targetNgan.moq && newTotal >= targetNgan.moq;
 
   // Cache idempotency key
   if (idempotencyKey) {

@@ -79,6 +79,7 @@ export interface Product {
   producer_id: string;
   name: string;
   slug: string;
+  category?: string;
   description: string;
   origin: string;
   unit: string;

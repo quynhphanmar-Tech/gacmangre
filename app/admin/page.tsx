@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { mockNgan001, mockOrdersStore } from '@/lib/data/mock-data';
+import { mockNgan001, mockNgans, mockOrdersStore } from '@/lib/data/mock-data';
 import { NganStatus, OrderStatus, EventItem } from '@/types';
 import ProgressBar from '@/components/ProgressBar';
 import {
@@ -11,11 +11,14 @@ import {
   RefreshCw,
   Bell,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  TrendingUp,
+  Share2,
+  PackageCheck
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<'orders' | 'events' | 'overview' | 'ngan'>('orders');
+  const [activeTab, setActiveTab] = useState<'live-validation' | 'orders' | 'events' | 'overview' | 'ngan'>('live-validation');
   const [nganStatus, setNganStatus] = useState<NganStatus>(mockNgan001.status);
   const [orders, setOrders] = useState(mockOrdersStore);
   const [currentQty, setCurrentQty] = useState(mockNgan001.current_quantity);
@@ -68,10 +71,10 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E7DFD3]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#141211] text-[#FAF8F5] text-[10px] font-mono uppercase tracking-pantryst font-bold">
-              Admin M3
+            <span className="px-2.5 py-0.5 rounded-full bg-[#A65F25] text-[#FAF8F5] text-[10px] font-mono uppercase tracking-pantryst font-bold">
+              GM-LIVE-01
             </span>
-            <span className="text-xs text-[#665E58] font-sans">Order Engine & Automation Events</span>
+            <span className="text-xs text-[#665E58] font-sans">Live Validation Sprint 01 · 4 Sản Vật Thực Tế</span>
           </div>
           <h1 className="font-serif text-3xl font-bold text-[#141211] mt-1">
             Quản Trị Vận Hành Gạc Măng Rê
@@ -80,6 +83,16 @@ export default function AdminDashboardPage() {
 
         {/* Tab Navigation */}
         <div className="flex items-center bg-[#EFE8DC]/60 p-1 rounded-2xl border border-[#E7DFD3] overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('live-validation')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'live-validation'
+                ? 'bg-[#A65F25] text-[#FAF8F5] shadow-sm'
+                : 'text-[#423B36] hover:text-[#141211]'
+            }`}
+          >
+            <span>LIVE VALIDATION (4 NGĂN)</span>
+          </button>
           <button
             onClick={() => setActiveTab('orders')}
             className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
@@ -126,6 +139,169 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* TAB: LIVE VALIDATION (GM-LIVE-01) */}
+      {activeTab === 'live-validation' && (
+        <div className="space-y-8">
+          {/* Executive Overview Banner */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-[#141211] to-[#2B2623] text-[#FAF8F5] shadow-lg border border-[#3E3834] space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#A65F25] text-white text-[10px] font-mono uppercase tracking-pantryst font-bold">
+                    SPRINT: GM-LIVE-01
+                  </span>
+                  <span className="text-xs text-[#C5BCB3]">Thời gian chạy: 7 Ngày (06/10 - 13/10/2026)</span>
+                </div>
+                <h2 className="font-serif text-2xl font-bold mt-1 text-[#FAF8F5]">
+                  Thử Nghiệm Thị Trường 4 Nhóm Sản Vật Thực Tế
+                </h2>
+                <p className="text-xs text-[#A89F95] mt-1 max-w-2xl">
+                  Mục tiêu kiểm chứng: Xác thực nhu cầu thực thông qua tín hiệu đặt hàng (không yêu cầu thanh toán trước, không giỏ hàng). Đánh giá sức hút câu chuyện và vận tốc gom mẻ.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="px-4 py-2 rounded-xl bg-[#FAF8F5] text-[#141211] text-xs font-semibold hover:bg-[#EFE8DC] transition inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <span>Xem Chiếc Tủ (Home)</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick KPI stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-[#3E3834]">
+              <div className="bg-[#1D1A18] p-3 rounded-2xl border border-[#2D2825]">
+                <span className="text-[10px] text-[#A89F95] uppercase font-mono tracking-pantryst">Tổng Ngăn Thử Nghiệm</span>
+                <p className="font-serif text-2xl font-bold text-[#FAF8F5]">4 Ngăn</p>
+                <span className="text-[10px] text-[#A65F25]">Cacao, Cà phê, Mật ong, Trứng</span>
+              </div>
+              <div className="bg-[#1D1A18] p-3 rounded-2xl border border-[#2D2825]">
+                <span className="text-[10px] text-[#A89F95] uppercase font-mono tracking-pantryst">Trạng Thái Gom</span>
+                <p className="font-serif text-2xl font-bold text-emerald-400">4 / 4 OPEN</p>
+                <span className="text-[10px] text-[#A89F95]">Đang mở nhận đăng ký</span>
+              </div>
+              <div className="bg-[#1D1A18] p-3 rounded-2xl border border-[#2D2825]">
+                <span className="text-[10px] text-[#A89F95] uppercase font-mono tracking-pantryst">Tín Hiệu Đơn Hàng</span>
+                <p className="font-serif text-2xl font-bold text-[#FAF8F5]">{orders.length} Đơn</p>
+                <span className="text-[10px] text-amber-300">Đơn xác thực thuần nhu cầu</span>
+              </div>
+              <div className="bg-[#1D1A18] p-3 rounded-2xl border border-[#2D2825]">
+                <span className="text-[10px] text-[#A89F95] uppercase font-mono tracking-pantryst">Nguyên Tắc Cốt Lõi</span>
+                <p className="font-serif text-xs font-bold text-[#FAF8F5] mt-1">Single Source of Truth</p>
+                <span className="text-[10px] text-[#A89F95]">Không tin tưởng client</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4 Ngăn Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {mockNgans.map((ngan) => {
+              const percent = Math.min(100, Math.round((ngan.current_quantity / ngan.moq) * 100));
+              const unit = ngan.product?.unit || 'phần';
+              const priceFmt = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+              }).format(ngan.price);
+
+              return (
+                <div
+                  key={ngan.id}
+                  className="p-6 rounded-3xl bg-[#FFFFFF] border border-[#E7DFD3] shadow-pantry space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-[#A65F25]">
+                          {ngan.number}
+                        </span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EFE8DC] text-[#665E58] uppercase">
+                          {ngan.product?.category || 'SẢN VẬT'}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        {ngan.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-[#141211]">
+                        {ngan.title}
+                      </h3>
+                      <p className="text-xs text-[#665E58] line-clamp-2 mt-1">
+                        {ngan.short_description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-baseline justify-between pt-2">
+                      <div>
+                        <span className="text-[10px] text-[#665E58] uppercase block">Giá dự kiến:</span>
+                        <span className="font-serif text-base font-bold text-[#141211]">
+                          {priceFmt}
+                        </span>
+                        <span className="text-[10px] text-[#665E58]"> / {unit}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-[#665E58] uppercase block">Mục tiêu MOQ:</span>
+                        <span className="font-serif text-base font-bold text-[#A65F25]">
+                          {ngan.current_quantity} / {ngan.moq} {unit}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress */}
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between text-[11px] font-mono">
+                        <span className="text-[#665E58]">Tiến độ mở ngăn</span>
+                        <span className="font-bold text-[#141211]">{percent}%</span>
+                      </div>
+                      <ProgressBar current={ngan.current_quantity} moq={ngan.moq} />
+                    </div>
+                  </div>
+
+                  {/* Actions & Links */}
+                  <div className="pt-4 border-t border-[#E7DFD3] flex items-center justify-between gap-3 text-xs">
+                    <Link
+                      href={`/ngan/${ngan.slug}`}
+                      target="_blank"
+                      className="text-[#A65F25] hover:text-[#141211] font-semibold flex items-center gap-1"
+                    >
+                      <span>Xem Ngăn</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                    <Link
+                      href={`/dat-hang/${ngan.slug}`}
+                      target="_blank"
+                      className="px-3 py-1.5 rounded-xl bg-[#141211] text-[#FAF8F5] hover:bg-[#A65F25] transition font-semibold flex items-center gap-1"
+                    >
+                      <span>Test Đặt Đơn</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Qualitative Signal Ingestion & Review Note */}
+          <div className="p-6 rounded-3xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#A65F25]" />
+              <h4 className="font-serif text-sm font-bold text-[#141211]">
+                Bản Đồ Chỉ Số Kiểm Chứng (Validation Playbook)
+              </h4>
+            </div>
+            <p className="text-xs text-[#665E58] leading-relaxed">
+              Theo tài liệu <code className="text-[#141211] bg-[#EFE8DC] px-1 py-0.5 rounded">docs/LIVE_VALIDATION_PLAYBOOK.md</code> và <code className="text-[#141211] bg-[#EFE8DC] px-1 py-0.5 rounded">docs/LIVE_VALIDATION_REPORT.md</code>, đội ngũ theo dõi tỷ lệ hoàn tất form, vận tốc gom/ngày, câu hỏi thường gặp về giá/độ uy tín, và phản hồi sau khi nhận hàng để ra quyết định Mở lại (Keep/Scale), Tinh chỉnh (Refine) hoặc Dừng (Kill).
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: ORDERS TABLE */}
       {activeTab === 'orders' && (
