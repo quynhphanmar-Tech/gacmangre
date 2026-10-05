@@ -2,6 +2,8 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { getServiceSupabase } from '@/lib/supabase/server';
 import { mockNgan001, mockOrdersStore } from '@/lib/data/mock-data';
 import { Order, OrderInput, OrderCreationResult } from '@/types';
+import { createEventRecord, processEvent } from '@/services/event-service';
+
 
 // Server-side atomic sequence counter for development/mock mode (sequential GM-2026-000074+)
 let mockSequenceCounter = 74;
@@ -208,7 +210,11 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
   };
 
   // Update Ngăn state
-  mockNgan001.current_quantity = currentConfirmed + quantity;
+  const prevQuantity = currentConfirmed;
+  const newTotal = prevQuantity + quantity;
+  mockNgan001.current_quantity = newTotal;
+  const reachedMoqNow = prevQuantity < mockNgan001.moq && newTotal >= mockNgan001.moq;
+
   if (mockNgan001.current_quantity >= mockNgan001.moq) {
     mockNgan001.status = 'FULL';
   }
@@ -220,6 +226,46 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
 
   mockOrdersStore.unshift(newOrder);
 
+  // M3: Emit Decoupled Events (Non-blocking: Failure does not affect order truth)
+  (async () => {
+    try {
+      // 1. Emit ORDER_CREATED
+      const orderEvt = await createEventRecord('ORDER_CREATED', 'order', newOrder.id, {
+        order_id: newOrder.id,
+        order_code: newOrder.order_code,
+        ngan_number: mockNgan001.number,
+        product_name: mockNgan001.title,
+        customer_name: name,
+        customer_phone: phone,
+        customer_zalo: zalo,
+        quantity,
+        current_quantity: newTotal,
+        moq: mockNgan001.moq,
+        created_at: newOrder.created_at,
+      });
+
+      // Dispatch notification
+      processEvent(orderEvt.id).catch((e) => console.warn('Non-blocking order notification error:', e));
+
+      // 2. Emit MOQ_REACHED if threshold is reached
+      if (reachedMoqNow) {
+        const moqEvt = await createEventRecord('MOQ_REACHED', 'ngan', mockNgan001.id, {
+          ngan_id: mockNgan001.id,
+          ngan_number: mockNgan001.number,
+          product_name: mockNgan001.title,
+          moq: mockNgan001.moq,
+          total_quantity: newTotal,
+          total_orders: mockOrdersStore.length,
+          triggered_at: new Date().toISOString(),
+        });
+
+        processEvent(moqEvt.id).catch((e) => console.warn('Non-blocking MOQ notification error:', e));
+      }
+    } catch (evtErr) {
+      console.warn('Background event emission logged error (order unaffected):', evtErr);
+    }
+  })();
+
   return {
     success: true,
     order: newOrder,
@@ -227,6 +273,7 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
     is_duplicate: false,
   };
 }
+
 
 export async function getOrderByIdOrCode(identifier: string): Promise<Order | null> {
   const db = getServiceSupabase() || supabase;

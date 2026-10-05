@@ -192,15 +192,22 @@ export interface Fulfillment {
   updated_at: string;
 }
 
+export type EventStatus = 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
+
 export interface EventItem {
   id: string;
   event_type: 'ORDER_CREATED' | 'MOQ_REACHED' | 'PRODUCER_CONFIRMED' | 'ORDER_SHIPPED' | 'ORDER_DELIVERED';
   entity_type: 'order' | 'ngan' | 'producer';
   entity_id: string;
   payload: Record<string, unknown>;
+  status: EventStatus;
+  retry_count: number;
+  last_error?: string;
   created_at: string;
   processed_at?: string;
+  updated_at?: string;
 }
+
 
 export interface OrderInput {
   name: string;

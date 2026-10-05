@@ -1,38 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/supabase/server';
+import { processEvent, getAllEvents } from '@/services/event-service';
 
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('x-make-secret') || request.headers.get('authorization');
-    const secret = process.env.MAKE_WEBHOOK_SECRET;
+    const secret = process.env.MAKE_WEBHOOK_SECRET || 'gacmangre-make-secret-2026';
 
-    // Security check: verify webhook secret if configured
-    if (secret && authHeader !== secret && authHeader !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 });
+    // Verify secret
+    if (authHeader !== secret && authHeader !== `Bearer ${secret}`) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Invalid or missing x-make-secret' },
+        { status: 401 }
+      );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { action, event_id } = body;
 
-    const db = getServiceSupabase();
-    if (!db) {
+    // Action A: Process specific event
+    if (event_id) {
+      const result = await processEvent(event_id);
       return NextResponse.json({
-        success: true,
-        message: 'Mock webhook handler acknowledged: ' + (action || 'ping'),
+        success: result.success,
+        event: result.event,
+        error: result.error,
       });
     }
 
-    // Mark event as processed if event_id is supplied
-    if (event_id) {
-      await db
-        .from('events')
-        .update({ processed_at: new Date().toISOString() })
-        .eq('id', event_id);
+    // Action B: Poller / Query pending events
+    if (action === 'poll_pending') {
+      const allEvents = await getAllEvents();
+      const pendingEvents = allEvents.filter((e) => e.status === 'PENDING' || e.status === 'FAILED');
+      return NextResponse.json({
+        success: true,
+        count: pendingEvents.length,
+        events: pendingEvents,
+      });
     }
 
-    return NextResponse.json({ success: true, processed: true });
+    return NextResponse.json({
+      success: true,
+      message: 'Make webhook endpoint ready. Provide event_id to process.',
+    });
   } catch (error: unknown) {
-    console.error('Webhook error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Make webhook error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
+}
+
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get('x-make-secret') || request.headers.get('authorization');
+  const secret = process.env.MAKE_WEBHOOK_SECRET || 'gacmangre-make-secret-2026';
+
+  if (authHeader !== secret && authHeader !== `Bearer ${secret}`) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Invalid or missing x-make-secret' },
+      { status: 401 }
+    );
+  }
+
+  const allEvents = await getAllEvents();
+  return NextResponse.json({
+    success: true,
+    total: allEvents.length,
+    events: allEvents,
+  });
 }
