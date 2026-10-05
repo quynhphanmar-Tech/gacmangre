@@ -73,8 +73,8 @@ export default async function HomePage() {
           </p>
         </div>
 
-        {/* 1–3 Selected Drop Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* 3 Selected Drop Cards (M4 Live Validation) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {ngans.map((ngan) => (
             <NganCard key={ngan.id} ngan={ngan} />
           ))}

@@ -24,7 +24,7 @@ export default function ShareButton({ orderCode, nganNumber, nganSlug }: ShareBu
       try {
         await navigator.share({
           title: `Gạc Măng Rê — Mở Ngăn ${nganNumber}`,
-          text: `Tôi vừa cùng mở Ngăn ${nganNumber} tại Gạc Măng Rê. Cùng mở để mẻ quà quê được chuyển về nhé!`,
+          text: `Tôi vừa cùng Gạc Măng Rê mở một Ngăn ${nganNumber}. Cùng mở để mẻ quà quê sớm gom đủ nhé!`,
           url: shareUrl,
         });
         return;

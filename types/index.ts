@@ -375,3 +375,77 @@ export interface SourceProfile {
   updated_at: string;
 }
 
+// ==============================================================================
+// M4 LIVE VALIDATION · 7 DAYS TYPES
+// ==============================================================================
+
+export type ExperimentDecision = 'SCALE' | 'KEEP_REVISE' | 'HOLD' | 'KILL' | 'INSUFFICIENT_DATA';
+
+export interface DailySnapshot {
+  date: string;
+  experiment_id: string;
+  views: number;
+  cta_clicks: number;
+  orders: number;
+  quantity: number;
+  shares: number;
+  top_traffic_source: string;
+}
+
+export interface ContentAngle {
+  id: string;
+  type: 'VUNG_DAT' | 'CON_NGUOI' | 'CHI_TIET';
+  headline: string;
+  hook: string;
+  utm_content: string;
+  impressions?: number;
+  clicks?: number;
+}
+
+export interface M4Experiment {
+  experiment_id: string;          // e.g. "GM-LIVE-01-001"
+  ngan_id: string;
+  ngan_number: string;
+  ngan_slug: string;
+  product_name: string;
+  producer_name: string;
+  gmr_fit_score: number;
+  status: 'ACTIVE' | 'FROZEN' | 'COMPLETED';
+  start_date: string;
+  days_live: number;
+
+  // Funnel & Core Metrics
+  ngan_views: number;
+  cta_clicks: number;
+  orders: number;
+  confirmed_quantity: number;     // North Star Metric
+  moq: number;
+  shares: number;
+
+  // Derived Performance Metrics
+  demand_velocity: number;        // confirmed_quantity / days_live
+  story_to_open_rate: number;     // cta_clicks / ngan_views
+  open_to_demand_rate: number;    // confirmed_quantity / ngan_views
+  progress_percent: number;       // (confirmed_quantity / moq) * 100
+
+  // Traffic & Content Angles
+  top_traffic_sources: { source: string; orders: number; views: number }[];
+  content_angles: ContentAngle[];
+
+  // Qualitative & Diagnosis
+  diagnosis?: string;
+  decision?: ExperimentDecision;
+  decision_rationale?: string;
+
+  // M4 Learning Loop
+  learning?: {
+    what_worked: string[];
+    what_did_not: string[];
+    customer_signal: string;
+    story_signal: string;
+    commerce_signal: string;
+    producer_signal: string;
+    next_action: string;
+  };
+}
+

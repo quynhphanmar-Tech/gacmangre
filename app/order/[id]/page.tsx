@@ -39,7 +39,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           </span>
 
           <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#141211] leading-tight">
-            ĐẶT NGĂN THÀNH CÔNG
+            BẠN VỪA CÙNG MỞ MỘT NGĂN
           </h1>
 
           <p className="text-xs text-[#665E58] font-sans">

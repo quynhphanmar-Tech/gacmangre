@@ -14,7 +14,8 @@ import {
   AlertCircle,
   TrendingUp,
   Share2,
-  PackageCheck
+  PackageCheck,
+  Activity
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -81,13 +82,20 @@ export default function AdminDashboardPage() {
           </h1>
         </div>
 
-        {/* Tab Navigation & Intake Link */}
-        <div className="flex items-center gap-3">
+        {/* Tab Navigation & Intake/Experiment Links */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/experiments"
+            className="px-3.5 py-2 rounded-2xl bg-[#141211] text-[#FAF8F5] text-xs font-semibold hover:bg-[#A65F25] transition whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm"
+          >
+            <Activity className="w-3 h-3 text-[#A65F25]" />
+            <span>M4 EXPERIMENTS</span>
+          </Link>
           <Link
             href="/admin/sources"
-            className="px-3.5 py-2 rounded-2xl bg-[#A65F25] text-[#FAF8F5] text-xs font-semibold hover:bg-[#8C4F1E] transition whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm"
+            className="px-3.5 py-2 rounded-2xl bg-[#EFE8DC] text-[#423B36] text-xs font-semibold hover:bg-[#E7DFD3] transition whitespace-nowrap inline-flex items-center gap-1.5 border border-[#E7DFD3]"
           >
-            <span>KHO NGUỒN & THẨM ĐỊNH (P0)</span>
+            <span>KHO NGUỒN (P0)</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
 

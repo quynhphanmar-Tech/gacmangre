@@ -41,8 +41,10 @@ export async function getNganBySlug(slug: string): Promise<Ngan | null> {
 }
 
 export async function getActiveNgans(): Promise<Ngan[]> {
+  const activeStatuses = ['OPEN', 'FULL', 'PRODUCER_CONFIRMING', 'PRODUCTION'];
+
   if (!isSupabaseConfigured || !supabase) {
-    return mockNgans;
+    return mockNgans.filter((n) => activeStatuses.includes(n.status));
   }
 
   const { data, error } = await supabase
@@ -54,11 +56,11 @@ export async function getActiveNgans(): Promise<Ngan[]> {
         producer:producers(*)
       )
     `)
-    .in('status', ['OPEN', 'FULL', 'PRODUCER_CONFIRMING', 'PRODUCTION'])
+    .in('status', activeStatuses)
     .order('number', { ascending: true });
 
   if (error || !data || data.length === 0) {
-    return mockNgans;
+    return mockNgans.filter((n) => activeStatuses.includes(n.status));
   }
 
   return data as Ngan[];

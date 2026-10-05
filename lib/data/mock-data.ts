@@ -253,7 +253,7 @@ export const mockNgans: Ngan[] = [
     current_quantity: 11,
     open_at: '2026-10-06T08:00:00Z',
     deadline: '2026-10-14T23:59:59Z',
-    status: 'OPEN',
+    status: 'DRAFT', // M4 Rule: Keep DEVELOP/DRAFT until proof is verified. Only 3 live Ngans!
     hero_image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=1200&auto=format&fit=crop',
     gallery: [
       'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=1200&auto=format&fit=crop',
