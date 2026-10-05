@@ -9,31 +9,75 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#FAF7F2",
-        foreground: "#211D1A",
-        earth: {
-          50: "#FAF7F2",
-          100: "#F4ECE1",
-          200: "#E8D8C3",
-          300: "#D6BFA0",
-          400: "#BE9D77",
-          500: "#9E7B54",
-          600: "#7F5E3C",
-          700: "#5F442A",
-          800: "#3E2B1B",
-          900: "#22170E",
+        // Base: Editorial Warm Ivory, Paper, and Deep Ink
+        ivory: {
+          50: "#FCFAF6",
+          100: "#F7F3EB",
+          200: "#EFE8DC",
+          300: "#E3D7C3",
+          DEFAULT: "#FAF8F5",
         },
-        ochre: {
-          DEFAULT: "#C86D32",
-          light: "#E08B4E",
-          dark: "#A34F1D",
+        paper: {
+          light: "#FFFFFF",
+          DEFAULT: "#F9F6F0",
+          dim: "#F3EDE2",
+          border: "#E7DFD3",
         },
-        clay: "#8C4A2F",
-        bamboo: "#3F4F38",
+        ink: {
+          lighter: "#665E58",
+          light: "#423B36",
+          DEFAULT: "#262220",
+          deep: "#141211",
+        },
+        // Accent: Muted Amber / Honey Ochre for Ngăn #001
+        amberWood: {
+          50: "#FAF3EB",
+          100: "#F3E3D1",
+          500: "#C27835",
+          600: "#A65F25",
+          700: "#864918",
+          800: "#693510",
+        },
+        sagePantry: {
+          50: "#F4F6F2",
+          500: "#4D6346",
+          700: "#364731",
+        },
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "Playfair Display", "Merriweather", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        serif: [
+          "Newsreader",
+          "Playfair Display",
+          "Merriweather",
+          "Baskerville",
+          "Georgia",
+          "serif",
+        ],
+        sans: [
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: [
+          "JetBrains Mono",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "monospace",
+        ],
+      },
+      boxShadow: {
+        pantry: "0 1px 3px rgba(20, 18, 17, 0.04), 0 8px 24px -4px rgba(20, 18, 17, 0.06)",
+        pantryHover: "0 4px 6px rgba(20, 18, 17, 0.04), 0 16px 36px -4px rgba(20, 18, 17, 0.10)",
+        subtleInner: "inset 0 1px 2px rgba(20, 18, 17, 0.05)",
+      },
+      letterSpacing: {
+        pantryst: "0.22em",
+        pantrystWide: "0.28em",
       },
     },
   },

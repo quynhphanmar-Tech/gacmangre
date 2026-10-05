@@ -1,36 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #FAF7F2;
-  --foreground: #211D1A;
+  --background: #FAF8F5;
+  --foreground: #262220;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom rustic selection styling */
+/* Subtle Editorial Pantry Styling */
 ::selection {
-  background-color: #BE9D77;
-  color: #FAF7F2;
+  background-color: #E3D7C3;
+  color: #141211;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Editorial subtle borders */
+.border-paper-subtle {
+  border-color: #E7DFD3;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAF7F2;
+  background: #FAF8F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D6BFA0;
-  border-radius: 4px;
+  background: #D7CEBE;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9E7B54;
+  background: #A65F25;
 }
