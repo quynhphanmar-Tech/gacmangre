@@ -1,137 +1,231 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { getServiceSupabase } from '@/lib/supabase/server';
 import { mockNgan001, mockOrdersStore } from '@/lib/data/mock-data';
-import { Order, OrderInput } from '@/types';
+import { Order, OrderInput, OrderCreationResult } from '@/types';
 
-// Generate human-friendly order code: GM-2026-XXXXXX
-export function generateOrderCode(): string {
-  const year = new Date().getFullYear();
-  const randomNum = Math.floor(100000 + Math.random() * 900000);
-  return `GM-${year}-${randomNum}`;
-}
+// Server-side atomic sequence counter for development/mock mode (sequential GM-2026-000074+)
+let mockSequenceCounter = 74;
+// In-memory idempotency cache to protect against rapid duplicate submits
+const idempotencyCache = new Map<string, Order>();
 
 // Vietnamese phone validation
 export function isValidVietnamPhone(phone: string): boolean {
+  if (!phone) return false;
   const cleaned = phone.replace(/[\s.-]/g, '');
   return /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/.test(cleaned);
 }
 
-export async function createOrder(input: OrderInput): Promise<{ success: boolean; order?: Order; error?: string }> {
-  // 1. Validation
-  if (!input.name || input.name.trim().length < 2) {
-    return { success: false, error: 'Vui lòng nhập họ và tên hợp lệ (tối thiểu 2 ký tự).' };
-  }
+// Sanitize string inputs against XSS and excessive whitespace
+export function sanitizeInput(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/[<>]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
 
-  if (!isValidVietnamPhone(input.phone)) {
-    return { success: false, error: 'Số điện thoại không đúng định dạng Việt Nam.' };
-  }
+// Format sequential order code: GM-2026-000001
+export function formatOrderCode(sequenceNumber: number): string {
+  const year = new Date().getFullYear();
+  const padded = String(sequenceNumber).padStart(6, '0');
+  return `GM-${year}-${padded}`;
+}
 
-  if (!input.address || input.address.trim().length < 5) {
-    return { success: false, error: 'Vui lòng nhập địa chỉ nhận hàng chi tiết.' };
-  }
-
-  if (!input.quantity || input.quantity < 1 || input.quantity > 10) {
-    return { success: false, error: 'Số lượng đặt mỗi lần từ 1 đến 10 phần.' };
-  }
-
-  const orderCode = generateOrderCode();
-  const unitPrice = 280000;
-  const totalAmount = unitPrice * input.quantity;
-
-  // 2. If Supabase is configured, execute database transaction
-  const db = getServiceSupabase() || supabase;
-  if (db && isSupabaseConfigured) {
-    try {
-      // Create or update customer
-      const { data: customerData, error: customerErr } = await db
-        .from('customers')
-        .insert({
-          name: input.name.trim(),
-          phone: input.phone.trim(),
-          zalo_identifier: input.zalo_identifier || input.phone.trim(),
-          address: input.address.trim(),
-          province: input.province || 'Toàn quốc',
-          source: 'DIRECT_WEB',
-          utm_source: input.utm_source,
-          utm_medium: input.utm_medium,
-          utm_campaign: input.utm_campaign,
-          utm_content: input.utm_content,
-        })
-        .select()
-        .single();
-
-      if (customerErr) throw customerErr;
-
-      // Insert Order
-      const { data: orderData, error: orderErr } = await db
-        .from('orders')
-        .insert({
-          order_code: orderCode,
-          customer_id: customerData.id,
-          ngan_id: input.ngan_id,
-          quantity: input.quantity,
-          unit_price: unitPrice,
-          total_amount: totalAmount,
-          status: 'CONFIRMED',
-          payment_status: 'PENDING_MOQ',
-          note: input.note,
-        })
-        .select(`
-          *,
-          customer:customers(*),
-          ngan:ngans(*)
-        `)
-        .single();
-
-      if (orderErr) throw orderErr;
-
-      return { success: true, order: orderData as Order };
-    } catch (err: unknown) {
-      console.error('Error creating order in Supabase:', err);
-      // Fallback to local memory store if database fails
+export async function createOrder(input: OrderInput): Promise<OrderCreationResult> {
+  // 1. Check Idempotency Key first (Prevent double click / repeated submit)
+  const idempotencyKey = input.idempotency_key?.trim();
+  if (idempotencyKey) {
+    if (idempotencyCache.has(idempotencyKey)) {
+      const existing = idempotencyCache.get(idempotencyKey)!;
+      return {
+        success: true,
+        order: existing,
+        order_code: existing.order_code,
+        is_duplicate: true,
+      };
     }
   }
 
-  // 3. Fallback: Save in memory mock store
+  // 2. Strict Server-Side Validation
+  const name = sanitizeInput(input.name);
+  if (!name || name.length < 2) {
+    return {
+      success: false,
+      error_code: 'VALIDATION_ERROR',
+      error: 'Vui lòng nhập họ và tên của bạn (tối thiểu 2 ký tự).',
+    };
+  }
+
+  const phone = input.phone?.trim();
+  if (!isValidVietnamPhone(phone)) {
+    return {
+      success: false,
+      error_code: 'VALIDATION_ERROR',
+      error: 'Số điện thoại không đúng định dạng Việt Nam (10 chữ số).',
+    };
+  }
+
+  const address = sanitizeInput(input.address);
+  if (!address || address.length < 5) {
+    return {
+      success: false,
+      error_code: 'VALIDATION_ERROR',
+      error: 'Vui lòng cung cấp địa chỉ nhận hàng chi tiết (tối thiểu 5 ký tự).',
+    };
+  }
+
+  const quantity = Math.floor(Number(input.quantity));
+  if (isNaN(quantity) || quantity < 1 || quantity > 10) {
+    return {
+      success: false,
+      error_code: 'VALIDATION_ERROR',
+      error: 'Số lượng mở mỗi lần hợp lệ là từ 1 đến 10 phần.',
+    };
+  }
+
+  const province = sanitizeInput(input.province || 'Toàn quốc');
+  const zalo = sanitizeInput(input.zalo_identifier || phone);
+  const note = input.note ? sanitizeInput(input.note) : undefined;
+  const source = input.source || 'DIRECT';
+  const landingUrl = input.landing_url;
+
+  // 3. Supabase Execution (if live database is configured)
+  const db = getServiceSupabase() || supabase;
+  if (db && isSupabaseConfigured) {
+    try {
+      // Call the atomic PostgreSQL function: fn_create_order_atomic
+      const { data, error } = await db.rpc('fn_create_order_atomic', {
+        p_ngan_id: input.ngan_id || mockNgan001.id,
+        p_customer_name: name,
+        p_customer_phone: phone,
+        p_customer_zalo: zalo,
+        p_customer_address: address,
+        p_customer_province: province,
+        p_quantity: quantity,
+        p_idempotency_key: idempotencyKey || null,
+        p_note: note || null,
+        p_source: source,
+        p_utm_source: input.utm_source || null,
+        p_utm_medium: input.utm_medium || null,
+        p_utm_campaign: input.utm_campaign || null,
+        p_utm_content: input.utm_content || null,
+        p_landing_url: landingUrl || null,
+      });
+
+      if (error) {
+        console.error('Supabase atomic order error:', error);
+        throw error;
+      }
+
+      if (data && !data.success) {
+        return {
+          success: false,
+          error_code: data.error_code,
+          error: data.error_message,
+          remaining_capacity: data.remaining_capacity,
+        };
+      }
+
+      // Fetch the created order with relations
+      const order = await getOrderByIdOrCode(data.order_code);
+      return {
+        success: true,
+        order: order || undefined,
+        order_code: data.order_code,
+        is_duplicate: data.is_duplicate || false,
+      };
+    } catch (err: unknown) {
+      console.warn('Supabase call failed, falling back to atomic in-memory engine:', err);
+      // Fall through to memory engine
+    }
+  }
+
+  // 4. In-Memory Atomic Simulation Engine (Zero failure mode)
+  // Lock: Check Ngăn status
+  if (mockNgan001.status !== 'OPEN') {
+    return {
+      success: false,
+      error_code: 'NGAN_CLOSED',
+      error: 'Ngăn này hiện không còn nhận đơn.',
+    };
+  }
+
+  // Calculate current confirmed demand
+  const currentConfirmed = mockOrdersStore
+    .filter((o) => o.status !== 'CANCELLED' && o.status !== 'REFUNDED')
+    .reduce((sum, o) => sum + o.quantity, 73); // baseline 73
+
+  const remaining = Math.max(0, mockNgan001.moq - currentConfirmed);
+
+  if (quantity > remaining) {
+    return {
+      success: false,
+      error_code: 'QUANTITY_UNAVAILABLE',
+      error: 'Số lượng bạn chọn đã vượt quá phần còn lại của Ngăn.',
+      remaining_capacity: remaining,
+    };
+  }
+
+  // Generate server-side sequential order code: GM-2026-000074...
+  mockSequenceCounter += 1;
+  const orderCode = formatOrderCode(mockSequenceCounter);
+  const unitPrice = mockNgan001.price; // Server-retrieved price!
+  const totalAmount = unitPrice * quantity;
+
   const newOrder: Order = {
-    id: `local-${Date.now()}`,
+    id: `ord-${Date.now()}-${mockSequenceCounter}`,
     order_code: orderCode,
     customer_id: `cust-${Date.now()}`,
-    ngan_id: input.ngan_id || mockNgan001.id,
-    quantity: input.quantity,
+    ngan_id: mockNgan001.id,
+    quantity,
     unit_price: unitPrice,
     total_amount: totalAmount,
     status: 'CONFIRMED',
-    payment_status: 'PENDING_MOQ',
-    note: input.note,
+    payment_status: 'UNPAID', // PM lock: no payment gateway yet
+    note,
+    source,
+    utm_source: input.utm_source,
+    utm_medium: input.utm_medium,
+    utm_campaign: input.utm_campaign,
+    utm_content: input.utm_content,
+    landing_url: landingUrl,
+    idempotency_key: idempotencyKey,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     customer: {
       id: `cust-${Date.now()}`,
-      name: input.name.trim(),
-      phone: input.phone.trim(),
-      zalo_identifier: input.zalo_identifier || input.phone.trim(),
-      address: input.address.trim(),
-      province: input.province || 'Toàn quốc',
-      utm_source: input.utm_source,
-      utm_medium: input.utm_medium,
-      utm_campaign: input.utm_campaign,
+      name,
+      phone,
+      zalo_identifier: zalo,
+      address,
+      province,
       created_at: new Date().toISOString(),
     },
     ngan: {
       ...mockNgan001,
-      current_quantity: mockNgan001.current_quantity + input.quantity,
+      current_quantity: currentConfirmed + quantity,
     },
   };
 
-  mockNgan001.current_quantity += input.quantity;
+  // Update Ngăn state
+  mockNgan001.current_quantity = currentConfirmed + quantity;
   if (mockNgan001.current_quantity >= mockNgan001.moq) {
     mockNgan001.status = 'FULL';
   }
 
+  // Cache idempotency key
+  if (idempotencyKey) {
+    idempotencyCache.set(idempotencyKey, newOrder);
+  }
+
   mockOrdersStore.unshift(newOrder);
 
-  return { success: true, order: newOrder };
+  return {
+    success: true,
+    order: newOrder,
+    order_code: orderCode,
+    is_duplicate: false,
+  };
 }
 
 export async function getOrderByIdOrCode(identifier: string): Promise<Order | null> {

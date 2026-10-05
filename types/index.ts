@@ -164,8 +164,15 @@ export interface Order {
   unit_price: number;
   total_amount: number;
   status: OrderStatus;
-  payment_status: string;
+  payment_status: string; // 'UNPAID' for M2
   note?: string;
+  source?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  landing_url?: string;
+  idempotency_key?: string;
   created_at: string;
   updated_at: string;
   customer?: Customer;
@@ -204,8 +211,22 @@ export interface OrderInput {
   quantity: number;
   ngan_id: string;
   note?: string;
+  source?: string;
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
   utm_content?: string;
+  landing_url?: string;
+  idempotency_key?: string;
 }
+
+export interface OrderCreationResult {
+  success: boolean;
+  order?: Order;
+  order_code?: string;
+  is_duplicate?: boolean;
+  error_code?: 'NGAN_NOT_FOUND' | 'NGAN_CLOSED' | 'QUANTITY_UNAVAILABLE' | 'VALIDATION_ERROR' | 'SERVER_ERROR';
+  error?: string;
+  remaining_capacity?: number;
+}
+
