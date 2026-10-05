@@ -81,62 +81,72 @@ export default function AdminDashboardPage() {
           </h1>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center bg-[#EFE8DC]/60 p-1 rounded-2xl border border-[#E7DFD3] overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('live-validation')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'live-validation'
-                ? 'bg-[#A65F25] text-[#FAF8F5] shadow-sm'
-                : 'text-[#423B36] hover:text-[#141211]'
-            }`}
+        {/* Tab Navigation & Intake Link */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/sources"
+            className="px-3.5 py-2 rounded-2xl bg-[#A65F25] text-[#FAF8F5] text-xs font-semibold hover:bg-[#8C4F1E] transition whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm"
           >
-            <span>LIVE VALIDATION (4 NGĂN)</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
-              activeTab === 'orders'
-                ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
-                : 'text-[#423B36] hover:text-[#141211]'
-            }`}
-          >
-            ĐƠN HÀNG ({orders.length})
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('events');
-              fetchEvents();
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'events'
-                ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
-                : 'text-[#423B36] hover:text-[#141211]'
-            }`}
-          >
-            <Bell className="w-3.5 h-3.5" />
-            <span>SỰ KIỆN ({events.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
-              activeTab === 'overview'
-                ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
-                : 'text-[#423B36] hover:text-[#141211]'
-            }`}
-          >
-            TIẾN ĐỘ MOQ
-          </button>
-          <button
-            onClick={() => setActiveTab('ngan')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
-              activeTab === 'ngan'
-                ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
-                : 'text-[#423B36] hover:text-[#141211]'
-            }`}
-          >
-            QUẢN LÝ NGĂN
-          </button>
+            <span>KHO NGUỒN & THẨM ĐỊNH (P0)</span>
+            <ExternalLink className="w-3 h-3" />
+          </Link>
+
+          <div className="flex items-center bg-[#EFE8DC]/60 p-1 rounded-2xl border border-[#E7DFD3] overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('live-validation')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap flex items-center gap-1.5 ${
+                activeTab === 'live-validation'
+                  ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
+                  : 'text-[#423B36] hover:text-[#141211]'
+              }`}
+            >
+              <span>VALIDATION (4 NGĂN)</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
+                activeTab === 'orders'
+                  ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
+                  : 'text-[#423B36] hover:text-[#141211]'
+              }`}
+            >
+              ĐƠN HÀNG ({orders.length})
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('events');
+                fetchEvents();
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap flex items-center gap-1.5 ${
+                activeTab === 'events'
+                  ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
+                  : 'text-[#423B36] hover:text-[#141211]'
+              }`}
+            >
+              <Bell className="w-3.5 h-3.5" />
+              <span>SỰ KIỆN ({events.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
+                activeTab === 'overview'
+                  ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
+                  : 'text-[#423B36] hover:text-[#141211]'
+              }`}
+            >
+              TIẾN ĐỘ MOQ
+            </button>
+            <button
+              onClick={() => setActiveTab('ngan')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-pantryst transition whitespace-nowrap ${
+                activeTab === 'ngan'
+                  ? 'bg-[#141211] text-[#FAF8F5] shadow-sm'
+                  : 'text-[#423B36] hover:text-[#141211]'
+              }`}
+            >
+              QUẢN LÝ NGĂN
+            </button>
+          </div>
         </div>
       </div>
 

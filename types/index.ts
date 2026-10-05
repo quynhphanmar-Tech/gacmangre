@@ -238,3 +238,140 @@ export interface OrderCreationResult {
   remaining_capacity?: number;
 }
 
+// ==============================================================================
+// M3.5 SYSTEMIC LIVE VALIDATION & PRODUCER INTELLIGENCE TYPES
+// ==============================================================================
+
+export type FactProvenance =
+  | 'VERIFIED'           // Đã xác thực thực địa / giấy tờ công chứng
+  | 'PRODUCER_CLAIM'     // Khẳng định từ phía nhà sản xuất (chưa kiểm chứng độc lập)
+  | 'SOURCE_INFERRED'    // Suy luận từ tài liệu / social media
+  | 'UNKNOWN';           // Chưa có thông tin
+
+export interface ExtractedFact {
+  field: string;
+  value: string;
+  provenance: FactProvenance;
+  source_reference?: string;
+  notes?: string;
+}
+
+export type CurationStatus =
+  | 'NEW'
+  | 'REVIEWING'
+  | 'NEEDS_INPUT'
+  | 'DEVELOP'
+  | 'READY'
+  | 'NOT_FIT';
+
+export interface GmrScorecard {
+  origin: number;                 // 0-10
+  human: number;                  // 0-10
+  craft: number;                  // 0-10
+  distinctiveness: number;        // 0-10
+  story_potential: number;        // 0-10
+  proof: number;                  // 0-10
+  product_quality_signal: number; // 0-10
+  commercial_readiness: number;   // 0-10
+  supply_reliability: number;     // 0-10
+  gmr_fit_score: number;          // Điểm tổng hợp có trọng số (0-10)
+  strengths: string[];
+  weaknesses: string[];
+  evaluation_summary: string;
+}
+
+export interface ProducerRequest {
+  id: string;
+  source_id: string;
+  producer_name: string;
+  missing_fields: string[];
+  suggested_message: string;      // Thông điệp mộc mạc gửi Zalo/gọi điện
+  status: 'PENDING' | 'SENT' | 'RECEIVED';
+  created_at: string;
+}
+
+export interface StoryBrief {
+  id: string;
+  source_id: string;
+  headline_angle: string;
+  fact: string;                   // Cốt lõi sự thật
+  detail: string;                 // Chi tiết đắt giá
+  human: string;                  // Con người & bàn tay làm ra
+  meaning: string;                // Ý nghĩa văn hóa / triết lý
+  product: string;                // Sản vật đóng gói
+  open_ngan_call: string;         // Lời mời mở Ngăn
+  editorial_interpretation: string; // Tách biệt rõ suy luận biên tập
+  media_recommendations: {
+    slot: string;
+    asset_type: AssetType;
+    description: string;
+  }[];
+}
+
+export interface SourceProfile {
+  id: string;
+  experiment_id?: string;         // e.g. "GM-LIVE-01-001"
+  status: CurationStatus;
+  input_url?: string;
+  raw_input_notes?: string;
+
+  // 1. Identity
+  producer_name: string;
+  organization?: string;
+  contact_phone?: string;
+  contact_zalo?: string;
+  contact_email?: string;
+  location: string;
+  source_urls: string[];
+
+  // 2. Product
+  category: string;
+  product_name: string;
+  product_description: string;
+  variants?: string[];
+
+  // 3. Origin
+  province: string;
+  district?: string;
+  locality?: string;
+  raw_material_origin: string;
+
+  // 4. Human
+  producer_person: string;
+  producer_story: string;
+
+  // 5. Process
+  production_method: string;
+  distinctive_practice: string;
+
+  // 6. Proof
+  certifications: string[];
+  documents: string[];
+  source_claims: string[];
+  references: string[];
+
+  // 7. Commercial
+  estimated_price?: number;
+  unit?: string;
+  moq?: number;
+  capacity?: number;
+  lead_time?: string;
+
+  // 8. Media
+  media_assets: MediaAsset[];
+
+  // 9. Intelligence & Curation Layer
+  facts: ExtractedFact[];
+  missing_fields: string[];
+  scorecard: GmrScorecard;
+  producer_request?: ProducerRequest;
+  story_brief?: StoryBrief;
+
+  // Reference to generated Ngăn if status === 'READY'
+  ngan_id?: string;
+  ngan_slug?: string;
+
+  created_at: string;
+  updated_at: string;
+}
+
