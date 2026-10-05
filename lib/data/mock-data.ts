@@ -1,4 +1,75 @@
-import { Ngan, Story, Producer, Product, Order } from '@/types';
+import { Ngan, Story, Producer, Product, Order, MediaAsset } from '@/types';
+
+// ==============================================================================
+// CURATED MEDIA ASSETS (Brief v1.1 Task 2 & 3: Documentary, Source, Editorial)
+// ==============================================================================
+export const mockMediaAssets: MediaAsset[] = [
+  {
+    id: 'asset-001-hero',
+    url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=1200&auto=format&fit=crop',
+    asset_type: 'DOCUMENTARY',
+    source: 'Chuyến thực địa Gạc Măng Rê 10/2026',
+    license: 'GacMangRe Exclusive',
+    credit: 'Ảnh: Gạc Măng Rê Thực Địa',
+    is_verified: true,
+    alt_text: 'Bát mật ong bạc hà hoa dại nguyên chất màu vàng chanh ánh xanh tại lán Mèo Vạc',
+    caption: 'Mật ong thô nguyên chất vừa hạ tầng, giữ trọn hạt phấn hoa tự nhiên.',
+    slot: 'hero',
+    created_at: '2026-10-02T08:00:00Z',
+  },
+  {
+    id: 'asset-002-hands',
+    url: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=800&auto=format&fit=crop',
+    asset_type: 'DOCUMENTARY',
+    source: 'Chuyến thực địa Gạc Măng Rê 10/2026',
+    license: 'GacMangRe Exclusive',
+    credit: 'Ảnh: Gạc Măng Rê Thực Địa',
+    is_verified: true,
+    alt_text: 'Đôi bàn tay anh Giàng A Páo nâng niu tàng ong đá vít nắp già',
+    caption: 'Đôi tay anh Páo kiểm tra độ chín của tàng ong trước khi đưa vào thùng quay.',
+    slot: 'hands',
+    created_at: '2026-10-02T08:00:00Z',
+  },
+  {
+    id: 'asset-003-landscape',
+    url: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=1200&auto=format&fit=crop',
+    asset_type: 'DOCUMENTARY',
+    source: 'Chuyến thực địa Gạc Măng Rê 10/2026',
+    license: 'GacMangRe Exclusive',
+    credit: 'Ảnh: Gạc Măng Rê Thực Địa',
+    is_verified: true,
+    alt_text: 'Triền đá vôi tai mèo sương mù buốt giá tại Mèo Vạc độ cao 1.200m',
+    caption: 'Thung lũng đá tai mèo nơi loài hoa bạc hà dại bừng nở tím vào mùa đông.',
+    slot: 'landscape',
+    created_at: '2026-10-02T08:00:00Z',
+  },
+  {
+    id: 'asset-004-producer',
+    url: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+    asset_type: 'SOURCE',
+    source: 'Nhà sản xuất cung cấp & Đối chiếu thực địa',
+    license: 'Producer Authorized',
+    credit: 'Cung cấp bởi: Giàng A Páo',
+    is_verified: true,
+    alt_text: 'Chân dung anh Giàng A Páo người Mông 18 năm giữ nghề nuôi ong đá',
+    caption: 'Anh Giàng A Páo tại lán ong Mèo Vạc.',
+    slot: 'producer',
+    created_at: '2026-10-02T08:00:00Z',
+  },
+  {
+    id: 'asset-005-texture',
+    url: 'https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=800&auto=format&fit=crop',
+    asset_type: 'EDITORIAL',
+    source: 'Gạc Măng Rê Curation Studio',
+    license: 'Curated Collection',
+    credit: 'Biên tập: Gạc Măng Rê',
+    is_verified: true,
+    alt_text: 'Dòng mật thô sánh vàng óng ánh chảy nhẹ nhàng',
+    caption: 'Độ sánh tự nhiên không qua xử lý cô đặc bằng nhiệt công nghiệp.',
+    slot: 'texture',
+    created_at: '2026-10-02T08:00:00Z',
+  },
+];
 
 export const mockProducer: Producer = {
   id: 'a1111111-1111-1111-1111-111111111111',
@@ -8,11 +79,12 @@ export const mockProducer: Producer = {
   location: 'Mèo Vạc, Hà Giang',
   description: 'Người giữ trọn phương thức quay mật truyền thống trên triền đá tai mèo cheo leo hơn 18 năm qua.',
   story: 'Mỗi mùa gió bấc tràn về cao nguyên đá, khi cây bạc hà dại nở những chùm hoa phớt tím trong sương muối, là lúc A Páo mang từng thùng ong gỗ mộc lên vách núi. Không đun sôi hạ thủy phần công nghiệp, mật của anh giữ trọn vẹn hương phấn hoa tươi và vị the mát tự nhiên.',
-  avatar: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop',
+  avatar: mockMediaAssets[3].url,
   phone: '0912345678',
   zalo: '0912345678',
   capacity: 100,
   status: 'ACTIVE',
+  media_assets: [mockMediaAssets[3]],
   created_at: '2026-10-01T00:00:00Z',
   updated_at: '2026-10-01T00:00:00Z',
 };
@@ -50,12 +122,13 @@ export const mockNgan001: Ngan = {
   open_at: '2026-10-02T08:00:00Z',
   deadline: '2026-10-15T23:59:59Z',
   status: 'OPEN',
-  hero_image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=1200&auto=format&fit=crop',
+  hero_image: mockMediaAssets[0].url,
   gallery: [
-    'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=1200&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=1200&auto=format&fit=crop'
+    mockMediaAssets[0].url,
+    mockMediaAssets[1].url,
+    mockMediaAssets[4].url,
   ],
+  media_assets: mockMediaAssets,
   selection_dat: 'Thổ nhưỡng đá vôi khô cằn trên độ cao 1.200m tạo nên loài hoa bạc hà dại tím ngát đặc hữu chỉ nở vào mùa đông lạnh nhất năm.',
   selection_nguoi: 'Anh Giàng A Páo — người Mông giữ phương thức quay mật truyền thống: chỉ lấy mật khi tàng ong vít nắp 100%, tuyệt đối không vắt ép non.',
   selection_vi: 'Vị ngọt dịu thanh, không gắt họng như mật đồng bằng, thoang thoảng hương thảo mộc the mát ở hậu vị.',
@@ -81,7 +154,8 @@ Chúng tôi tìm đến lán của anh Giàng A Páo khi sương chiều vừa b
 Ngụm mật đầu tiên tan trên đầu lưỡi mang đến cảm giác hoàn toàn khác biệt: không ngọt khé, không nồng mùi hương liệu, mà thanh mát, có một chút the nhẹ như gió sớm thổi qua rặng cây.
 
 Đó là lý do Gạc Măng Rê quyết định mở Ngăn #001: đưa hương vị chân thật của triền đá Hà Giang về đúng căn bếp của những người biết trân trọng sự tử tế.`,
-  cover_image: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=1200&auto=format&fit=crop',
+  cover_image: mockMediaAssets[2].url,
+  media_assets: [mockMediaAssets[2], mockMediaAssets[1], mockMediaAssets[3]],
   producer_id: mockProducer.id,
   product_id: mockProduct.id,
   published_at: '2026-10-02T08:00:00Z',
@@ -92,7 +166,6 @@ Ngụm mật đầu tiên tan trên đầu lưỡi mang đến cảm giác hoàn
   product: mockProduct,
 };
 
-// In-memory orders store for demo / development fallback
 export const mockOrdersStore: Order[] = [
   {
     id: 'e5555555-5555-5555-5555-555555555551',

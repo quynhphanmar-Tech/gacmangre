@@ -1,5 +1,6 @@
 // ==============================================================================
 // GẠC MĂNG RÊ — Core TypeScript Type Definitions
+// Version: 1.1 (Build Brief v1.1 + Content & Image Architecture)
 // ==============================================================================
 
 export type NganStatus =
@@ -35,6 +36,26 @@ export type FulfillmentStatus =
 
 export type EntityStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT';
 
+// ==============================================================================
+// CONTENT & IMAGE ASSET TYPES (Brief v1.1 Task 2 & 3)
+// ==============================================================================
+export type AssetType = 'DOCUMENTARY' | 'SOURCE' | 'EDITORIAL' | 'AI_GENERATED';
+
+export interface MediaAsset {
+  id: string;
+  url: string;
+  thumbnail_url?: string;
+  asset_type: AssetType;
+  source: string;              // e.g. "Chuyến thực địa Gạc Măng Rê 10/2026", "Zalo Giàng A Páo"
+  license: string;             // e.g. "GacMangRe Exclusive", "Producer Authorized"
+  credit: string;              // e.g. "Ảnh: Nguyễn Văn A", "Cung cấp bởi Giàng A Páo"
+  is_verified: boolean;        // true nếu là ảnh chụp thực tế đã xác thực
+  alt_text: string;            // Mô tả ảnh trợ năng & SEO
+  caption?: string;            // Chú thích chân thực
+  slot?: 'hero' | 'hands' | 'landscape' | 'process' | 'texture' | 'producer';
+  created_at: string;
+}
+
 export interface Producer {
   id: string;
   name: string;
@@ -48,6 +69,7 @@ export interface Producer {
   zalo: string;
   capacity: number;
   status: EntityStatus;
+  media_assets?: MediaAsset[];
   created_at: string;
   updated_at: string;
 }
@@ -87,6 +109,7 @@ export interface Ngan {
   status: NganStatus;
   hero_image: string;
   gallery: string[];
+  media_assets?: MediaAsset[];
   selection_dat: string;
   selection_nguoi: string;
   selection_vi: string;
@@ -108,6 +131,7 @@ export interface Story {
   video_url?: string;
   producer_id?: string;
   product_id?: string;
+  media_assets?: MediaAsset[];
   published_at: string;
   status: EntityStatus;
   created_at: string;

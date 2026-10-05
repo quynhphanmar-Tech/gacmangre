@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getStoryBySlug } from '@/services/story-service';
-import { MapPin, ArrowRight, Compass, ShieldCheck } from 'lucide-react';
+import { MapPin, ArrowRight, Compass, Camera } from 'lucide-react';
 
 interface StoryPageProps {
   params: Promise<{ slug: string }>;
@@ -15,6 +15,8 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
   if (!story) {
     notFound();
   }
+
+  const coverAsset = story.media_assets?.[0];
 
   return (
     <article className="pb-28">
@@ -44,17 +46,30 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
         </div>
       </section>
 
-      {/* 2. COVER PHOTOGRAPHY WITH GENEROUS WHITESPACE */}
+      {/* 2. COVER PHOTOGRAPHY WITH METADATA CAPTION */}
       <div className="max-w-5xl mx-auto px-5 sm:px-8 mb-16">
         <div className="relative aspect-[16/9] rounded-3xl overflow-hidden shadow-pantry border border-[#E7DFD3]">
           <Image
-            src={story.cover_image}
-            alt={story.title}
+            src={coverAsset?.url || story.cover_image}
+            alt={coverAsset?.alt_text || story.title}
             fill
             priority
             sizes="(max-width: 1200px) 100vw, 1200px"
             className="object-cover"
           />
+          {coverAsset?.is_verified && (
+            <div className="absolute top-4 left-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141211]/85 backdrop-blur-md text-[10px] font-sans font-medium text-[#FAF8F5]">
+                <Camera className="w-3 h-3 text-[#A65F25]" />
+                <span>Tư liệu thực địa xác thực</span>
+              </span>
+            </div>
+          )}
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="text-[10px] text-[#FAF8F5]/90 bg-[#141211]/60 backdrop-blur-sm px-3 py-1 rounded-md line-clamp-1 inline-block">
+              {coverAsset?.caption || 'Thung lũng đá tai mèo Mèo Vạc mùa sương muối.'} · {coverAsset?.credit || 'Ảnh: Gạc Măng Rê'}
+            </p>
+          </div>
         </div>
       </div>
 

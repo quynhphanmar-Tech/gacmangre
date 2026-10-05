@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNganBySlug } from '@/services/ngan-service';
 import ProgressBar from '@/components/ProgressBar';
-import { MapPin, ArrowRight, ShieldCheck, Check, Sparkles } from 'lucide-react';
+import { MapPin, ArrowRight, ShieldCheck, Check, Sparkles, Camera } from 'lucide-react';
 
 interface NganPageProps {
   params: Promise<{ slug: string }>;
@@ -22,54 +22,78 @@ export default async function NganDetailPage({ params }: NganPageProps) {
     currency: 'VND',
   }).format(ngan.price);
 
+  const heroAsset = ngan.media_assets?.[0];
+  const handsAsset = ngan.media_assets?.[1];
+  const textureAsset = ngan.media_assets?.[4];
+
   return (
     <div className="pb-32">
       {/* 00. ABOVE-FOLD HERO — CLEAR, FAST, 5 KEY ANSWERS (Brief v1.1 Section 07) */}
       <section className="pt-8 md:pt-16 pb-14 px-5 sm:px-8 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* Photography Gallery (Editorial framing) */}
+          {/* Photography Gallery with Documentary Metadata */}
           <div className="lg:col-span-7 space-y-4">
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-pantry border border-[#E7DFD3] bg-[#F3EDE2]">
               <Image
-                src={ngan.hero_image}
-                alt={ngan.title}
+                src={heroAsset?.url || ngan.hero_image}
+                alt={heroAsset?.alt_text || ngan.title}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover"
               />
-              <div className="absolute top-4 left-4">
+              <div className="absolute top-4 left-4 flex items-center gap-2">
                 <span className="px-3.5 py-1.5 rounded-full bg-[#141211]/90 backdrop-blur-md text-[#FAF8F5] font-mono text-[11px] tracking-pantryst uppercase shadow-sm">
                   NGĂN {ngan.number}
                 </span>
+                {heroAsset?.is_verified && (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFFFFF]/85 backdrop-blur-md text-[10px] font-sans font-medium text-[#141211]">
+                    <Camera className="w-3 h-3 text-[#A65F25]" />
+                    <span>{heroAsset.asset_type === 'DOCUMENTARY' ? 'Tư liệu thực địa' : heroAsset.asset_type}</span>
+                  </span>
+                )}
+              </div>
+              <div className="absolute bottom-3 left-4 right-4">
+                <p className="text-[10px] text-[#FAF8F5]/90 bg-[#141211]/60 backdrop-blur-sm px-2.5 py-1 rounded-md line-clamp-1">
+                  {heroAsset?.caption || 'Mật ong thô nguyên chất vừa hạ tầng, giữ trọn hạt phấn hoa tự nhiên.'} · {heroAsset?.credit || 'Ảnh: Gạc Măng Rê'}
+                </p>
               </div>
             </div>
 
             {/* Editorial Secondary Photography (Đôi tay & Quy trình) */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
                 <Image
-                  src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=600&auto=format&fit=crop"
-                  alt="Đôi tay thu mật hoa dại"
+                  src={handsAsset?.url || "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=600&auto=format&fit=crop"}
+                  alt={handsAsset?.alt_text || "Đôi tay thu mật hoa dại"}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
+                  Đôi tay
+                </span>
               </div>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
                 <Image
-                  src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=600&auto=format&fit=crop"
-                  alt="Tổ ong đá tự nhiên"
+                  src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=600&auto=format&fit=crop"
+                  alt="Vách đá tai mèo Mèo Vạc"
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
+                  Vùng đất
+                </span>
               </div>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
                 <Image
-                  src="https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=600&auto=format&fit=crop"
-                  alt="Rót mật thô sánh"
+                  src={textureAsset?.url || "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=600&auto=format&fit=crop"}
+                  alt={textureAsset?.alt_text || "Rót mật thô sánh"}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
+                  Mật thô
+                </span>
               </div>
             </div>
           </div>
