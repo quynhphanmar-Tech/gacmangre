@@ -706,4 +706,190 @@ export interface CaptureJob {
   updated_at: string;
 }
 
+// ==============================================================================
+// M4 — EXPERIENCE GOVERNANCE & CONTROL SYSTEM
+// ==============================================================================
+
+export type GovernanceGateId =
+  | 'BG' // Brand Gate
+  | 'TG' // Truth Gate
+  | 'SG' // Story Gate
+  | 'NG' // Ngăn State Gate
+  | 'AG' // Asset Gate
+  | 'CG' // Commerce Gate
+  | 'UX' // UX Gate
+  | 'CT' // Content Linter
+  | 'TR'; // Traceability Gate
+
+export type GateEvaluationStatus = 'PASS' | 'FAIL' | 'BLOCKED';
+
+export type TruthStatus =
+  | 'VERIFIED'
+  | 'PRODUCER_CLAIM'
+  | 'EDITORIAL_INTERPRETATION'
+  | 'UNKNOWN';
+
+export interface TruthClaimItem {
+  claim_id: string;
+  claim_text: string;
+  truth_status: TruthStatus;
+  evidence_id?: string;
+  source_id?: string;
+  confidence: number; // 0.0 - 1.0
+  is_brand_critical?: boolean;
+}
+
+export interface GateRuleResult {
+  rule_id: string;
+  name: string;
+  gate_id: GovernanceGateId;
+  is_hard_gate: boolean;
+  status: 'PASS' | 'FAIL';
+  score?: number; // Cho UX Gate
+  max_score?: number;
+  message: string;
+  details?: Record<string, any>;
+  evidence_ref?: string;
+}
+
+export interface GateSummaryResult {
+  gate_id: GovernanceGateId;
+  name: string;
+  is_hard_gate: boolean;
+  status: GateEvaluationStatus;
+  passed_rules: number;
+  total_rules: number;
+  score?: number;
+  weight?: number;
+  rules: GateRuleResult[];
+}
+
+export interface UxGateBreakdown {
+  legibility_accessibility: number; // Max 25
+  clarity_task_speed: number;       // Max 25
+  group_buy_transparency: number;   // Max 25
+  product_scannability_trust: number;// Max 25
+  total_score: number;              // Target >= 85
+  p0_count: number;                 // Must be 0
+  p1_count: number;                 // Must be 0
+}
+
+export interface ExperienceGovernanceInput {
+  target_id: string;
+  content_id?: string;
+  story_id?: string;
+  ngan_id?: string;
+  product_id?: string;
+  producer_id?: string;
+  source_id?: string;
+  evidence_ids?: string[];
+  
+  // Data payload to govern
+  brand_context?: {
+    brand_name: string;
+    brand_idea: string;
+    raw_copy: string;
+    cta_text: string;
+    logo_asset_id?: string;
+  };
+  claims?: TruthClaimItem[];
+  story_object?: {
+    producer: string;
+    place: string;
+    product: string;
+    core_story: string;
+    evidence: string[];
+    gmr_fit: number;
+    unknowns: string[];
+    visual_direction: string;
+    demand_state: string;
+    narrative_steps?: string[]; // FACT → DETAIL → HUMAN → PLACE → CRAFT → MEANING → PRODUCT → OPEN NGĂN
+  };
+  ngan_state_context?: {
+    current_state: NganStatus;
+    cta_rendered: string;
+    shows_current_quantity: boolean;
+    shows_moq: boolean;
+    shows_remaining: boolean;
+    shows_what_happens_next: boolean;
+    shows_fulfillment_status?: boolean;
+  };
+  asset_context?: {
+    assets: {
+      asset_id: string;
+      url: string;
+      source: string;
+      license: string;
+      credit: string;
+      is_verified: boolean;
+      provenance_valid: boolean;
+    }[];
+  };
+  commerce_context?: {
+    unit_price: number;
+    moq: number;
+    official_source_confirmed: boolean;
+    payment_terms_clarified: boolean;
+  };
+  ux_context?: {
+    body_font_size_px: number;
+    touch_target_size_px: number;
+    contrast_ratio: number;
+    time_to_cta_seconds: number;
+    comprehension_seconds: number;
+    p0_issues: string[];
+    p1_issues: string[];
+  };
+  content_text?: string;
+}
+
+export interface GovernanceScorecard {
+  id: string;
+  evaluated_at: string;
+  target_id: string;
+  overall_status: 'APPROVED' | 'REJECTED';
+  rejection_reason?: string;
+  gates: Record<GovernanceGateId, GateSummaryResult>;
+  ux_breakdown: UxGateBreakdown;
+  traceability_chain: {
+    content_id?: string;
+    story_id?: string;
+    ngan_id?: string;
+    product_id?: string;
+    producer_id?: string;
+    source_id?: string;
+    evidence_ids: string[];
+    is_fully_traceable: boolean;
+  };
+  regressions_checked: number;
+  regressions_passed: number;
+}
+
+export interface FailureRecord {
+  failure_id: string;
+  severity: 'P0' | 'P1' | 'P2' | 'P3';
+  detected_at: string;
+  module: GmrModule | 'GOVERNANCE';
+  gate_id: GovernanceGateId;
+  symptom: string;
+  root_cause: string;
+  rule_created: string; // e.g. "REG-BRAND-002"
+  fix_commit?: string;
+  regression_test: string;
+  status: 'OPEN' | 'RESOLVED' | 'VERIFIED';
+}
+
+export interface RegressionRule {
+  rule_id: string;
+  gate_id: GovernanceGateId;
+  failure_id: string;
+  title: string;
+  description: string;
+  forbidden_pattern?: string | RegExp;
+  required_condition: string;
+  last_verified_at: string;
+  pass_count: number;
+}
+
+
 
