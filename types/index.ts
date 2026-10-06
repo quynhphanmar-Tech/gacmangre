@@ -29,9 +29,15 @@ export type OrderStatus =
 export type FulfillmentStatus =
   | 'PENDING'
   | 'PRODUCER_CONFIRMED'
-  | 'PROCESSING'
+  | 'PREPARING'
+  | 'READY_TO_RECEIVE'
+  | 'RECEIVED'
+  | 'PACKED'
+  | 'READY_TO_SHIP'
   | 'SHIPPED'
   | 'DELIVERED'
+  | 'CANCELLED'
+  | 'FAILED'
   | 'RETURNED';
 
 export type EntityStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT';
@@ -197,9 +203,21 @@ export type EventStatus = 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
 
 export interface EventItem {
   id: string;
-  event_type: 'ORDER_CREATED' | 'MOQ_REACHED' | 'PRODUCER_CONFIRMED' | 'ORDER_SHIPPED' | 'ORDER_DELIVERED';
-  entity_type: 'order' | 'ngan' | 'producer';
+  correlation_id: string;
+  event_type:
+    | 'ORDER_CREATED'
+    | 'MOQ_REACHED'
+    | 'PRODUCER_CONFIRMED'
+    | 'PACKAGE_CREATED'
+    | 'QR_SCANNED'
+    | 'LOYALTY_GRANTED'
+    | 'ORDER_SHIPPED'
+    | 'ORDER_DELIVERED'
+    | 'FEEDBACK_CREATED';
+  entity_type: 'order' | 'ngan' | 'producer' | 'package' | 'qr' | 'story' | 'source';
   entity_id: string;
+  actor_id?: string;
+  actor_role?: 'SYSTEM' | 'ADMIN' | 'PRODUCER' | 'WAREHOUSE_STAFF' | 'CUSTOMER';
   payload: Record<string, unknown>;
   status: EventStatus;
   retry_count: number;
@@ -207,6 +225,63 @@ export interface EventItem {
   created_at: string;
   processed_at?: string;
   updated_at?: string;
+}
+
+export type GmrModule =
+  | 'SOURCE'
+  | 'CURATION'
+  | 'STORY'
+  | 'NGAN'
+  | 'DEMAND'
+  | 'ORDER'
+  | 'AUTOMATION'
+  | 'FULFILLMENT'
+  | 'QR'
+  | 'LOYALTY'
+  | 'CRM'
+  | 'ADAPTER_ZALO'
+  | 'ADAPTER_CARRIER'
+  | 'ADAPTER_MAKE';
+
+export interface AuditLog {
+  id: string;
+  correlation_id: string;
+  timestamp: string;
+  module: GmrModule;
+  action: string;
+  actor: {
+    id: string;
+    name: string;
+    role: 'ADMIN' | 'PRODUCER' | 'STAFF' | 'SYSTEM' | 'CUSTOMER';
+  };
+  entity: {
+    type: 'ORDER' | 'NGAN' | 'PRODUCER' | 'BATCH' | 'SHIPMENT' | 'STORY' | 'SOURCE' | 'QR' | 'POINT';
+    id: string;
+    code?: string;
+  };
+  from_state?: string;
+  to_state?: string;
+  reason?: string;
+  result: 'SUCCESS' | 'FAILED' | 'PARTIAL';
+  metadata?: Record<string, unknown>;
+}
+
+export interface ErrorLog {
+  id: string;
+  correlation_id: string;
+  timestamp: string;
+  module: GmrModule;
+  error_code: string;
+  error_message: string;
+  stack_trace?: string;
+  entity?: {
+    type: string;
+    id: string;
+  };
+  retry_count: number;
+  status: 'PENDING_RETRY' | 'FAILED' | 'RESOLVED';
+  resolved_at?: string;
+  resolved_by?: string;
 }
 
 
@@ -448,4 +523,133 @@ export interface M4Experiment {
     next_action: string;
   };
 }
+
+// ==============================================================================
+// M4 FULFILLMENT + QR + DELIVERY + CRM BRIDGE TYPES
+// ==============================================================================
+
+export type ScanAction =
+  | 'SCAN_BATCH'
+  | 'RECEIVE_BATCH'
+  | 'SCAN_ORDER'
+  | 'PACK_ORDER'
+  | 'MARK_READY'
+  | 'MARK_SHIPPED'
+  | 'MARK_DELIVERED';
+
+export interface ScanEvent {
+  id: string;
+  token: string;
+  order_id?: string;
+  order_code?: string;
+  batch_id?: string;
+  batch_code?: string;
+  actor_type: 'WAREHOUSE_STAFF' | 'PRODUCER' | 'ADMIN' | 'SYSTEM';
+  actor_id: string;
+  action: ScanAction;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type BatchStatus = 'CREATED' | 'DISPATCHED' | 'RECEIVED' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
+
+export interface FulfillmentBatchItem {
+  id: string;
+  batch_id: string;
+  order_id: string;
+  order_code: string;
+  quantity: number;
+  status: 'PENDING' | 'RECEIVED' | 'PACKED' | 'SHIPPED';
+  created_at: string;
+}
+
+export interface FulfillmentBatch {
+  id: string;
+  batch_code: string;             // e.g. "BATCH-003-2026-01"
+  ngan_id: string;
+  ngan_number: string;
+  producer_id: string;
+  producer_name: string;
+  expected_quantity: number;
+  received_quantity: number;
+  status: BatchStatus;
+  items?: FulfillmentBatchItem[];
+  created_at: string;
+  received_at?: string;
+  notes?: string;
+}
+
+export interface Shipment {
+  id: string;
+  order_id: string;
+  order_code: string;
+  carrier: string;                // e.g. "MANUAL", "GHN", "VIETTEL_POST", "XE_KHACH"
+  tracking_code: string;
+  shipping_fee: number;
+  status: 'PREPARED' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED' | 'RETURNED';
+  shipped_at?: string;
+  delivered_at?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PointLedgerEntry {
+  id: string;
+  member_id: string;
+  customer_phone: string;
+  event_id: string;
+  order_id: string;
+  order_code: string;
+  points: number;
+  type: 'EARNED_DELIVERED' | 'REFUNDED_RETURN' | 'ADJUSTED';
+  created_at: string;
+}
+
+export interface CustomerCrmSummary {
+  phone: string;
+  name: string;
+  points_balance: number;
+  order_count: number;
+  total_spent: number;
+  last_order_code?: string;
+  last_order_at?: string;
+  last_delivery_at?: string;
+  fulfillment_history: {
+    order_code: string;
+    product_name: string;
+    quantity: number;
+    status: FulfillmentStatus;
+    delivered_at?: string;
+  }[];
+}
+
+export type CaptureStatus = 'UPLOADED' | 'CAPTURED' | 'EXTRACTED' | 'MATCHED' | 'NEEDS_HUMAN_REVIEW' | 'CONFIRMED';
+
+export interface ExtractedOrderRecord {
+  id: string;
+  raw_text: string;
+  extracted_customer_name?: string;
+  extracted_phone?: string;
+  extracted_product?: string;
+  extracted_quantity?: number;
+  extracted_address?: string;
+  matched_order_id?: string;
+  matched_order_code?: string;
+  confidence_score: number;       // 0 - 1.0
+  status: 'PENDING_MATCH' | 'MATCHED' | 'NEEDS_HUMAN_REVIEW' | 'CONFIRMED';
+}
+
+export interface CaptureJob {
+  id: string;
+  file_name: string;
+  file_type: 'EXCEL' | 'CSV' | 'IMAGE' | 'PDF';
+  file_url?: string;
+  producer_id: string;
+  status: CaptureStatus;
+  records: ExtractedOrderRecord[];
+  created_at: string;
+  updated_at: string;
+}
+
 

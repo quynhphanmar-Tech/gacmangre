@@ -229,38 +229,86 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
 
   mockOrdersStore.unshift(newOrder);
 
+  // M4 Audit Foundation: Generate workflow correlation_id
+  const correlationId = `corr_ord_${newOrder.order_code.toLowerCase().replace(/[^a-z0-9]/g, '')}_${Date.now()}`;
+
+  // Record Audit Log (Non-blocking)
+  try {
+    const { AuditService } = await import('@/services/audit-service');
+    AuditService.recordAudit({
+      correlation_id: correlationId,
+      module: 'ORDER',
+      action: 'ORDER_CREATED',
+      actor: {
+        id: newOrder.customer?.id || 'cust-anon',
+        name: name,
+        role: 'CUSTOMER',
+      },
+      entity: {
+        type: 'ORDER',
+        id: newOrder.id,
+        code: newOrder.order_code,
+      },
+      from_state: 'NEW',
+      to_state: 'CONFIRMED',
+      reason: `Khách hàng mở ${quantity} phần trên Ngăn ${targetNgan.number}`,
+      result: 'SUCCESS',
+      metadata: {
+        quantity,
+        total_amount: totalAmount,
+        ngan_id: targetNgan.id,
+      },
+    });
+  } catch (auditErr) {
+    console.warn('Audit recording error (order unaffected):', auditErr);
+  }
+
   // M3: Emit Decoupled Events (Non-blocking: Failure does not affect order truth)
   (async () => {
     try {
       // 1. Emit ORDER_CREATED
-      const orderEvt = await createEventRecord('ORDER_CREATED', 'order', newOrder.id, {
-        order_id: newOrder.id,
-        order_code: newOrder.order_code,
-        ngan_number: mockNgan001.number,
-        product_name: mockNgan001.title,
-        customer_name: name,
-        customer_phone: phone,
-        customer_zalo: zalo,
-        quantity,
-        current_quantity: newTotal,
-        moq: mockNgan001.moq,
-        created_at: newOrder.created_at,
-      });
+      const orderEvt = await createEventRecord(
+        'ORDER_CREATED',
+        'order',
+        newOrder.id,
+        {
+          order_id: newOrder.id,
+          order_code: newOrder.order_code,
+          correlation_id: correlationId,
+          ngan_number: targetNgan.number,
+          product_name: targetNgan.title,
+          customer_name: name,
+          customer_phone: phone,
+          customer_zalo: zalo,
+          quantity,
+          current_quantity: newTotal,
+          moq: targetNgan.moq,
+          created_at: newOrder.created_at,
+        },
+        { correlation_id: correlationId, actor_role: 'CUSTOMER' }
+      );
 
       // Dispatch notification
       processEvent(orderEvt.id).catch((e) => console.warn('Non-blocking order notification error:', e));
 
       // 2. Emit MOQ_REACHED if threshold is reached
       if (reachedMoqNow) {
-        const moqEvt = await createEventRecord('MOQ_REACHED', 'ngan', mockNgan001.id, {
-          ngan_id: mockNgan001.id,
-          ngan_number: mockNgan001.number,
-          product_name: mockNgan001.title,
-          moq: mockNgan001.moq,
-          total_quantity: newTotal,
-          total_orders: mockOrdersStore.length,
-          triggered_at: new Date().toISOString(),
-        });
+        const moqEvt = await createEventRecord(
+          'MOQ_REACHED',
+          'ngan',
+          targetNgan.id,
+          {
+            ngan_id: targetNgan.id,
+            correlation_id: correlationId,
+            ngan_number: targetNgan.number,
+            product_name: targetNgan.title,
+            moq: targetNgan.moq,
+            total_quantity: newTotal,
+            total_orders: mockOrdersStore.length,
+            triggered_at: new Date().toISOString(),
+          },
+          { correlation_id: correlationId, actor_role: 'SYSTEM' }
+        );
 
         processEvent(moqEvt.id).catch((e) => console.warn('Non-blocking MOQ notification error:', e));
       }

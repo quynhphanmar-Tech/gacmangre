@@ -12,6 +12,7 @@ import { mockProducer, mockNgan001 } from '@/lib/data/mock-data';
 export const mockEventsStore: EventItem[] = [
   {
     id: 'evt-001',
+    correlation_id: 'corr_ord_gm2026000073_init',
     event_type: 'ORDER_CREATED',
     entity_type: 'order',
     entity_id: 'e5555555-5555-5555-5555-555555555551',
@@ -35,17 +36,33 @@ export const mockEventsStore: EventItem[] = [
 ];
 
 export async function createEventRecord(
-  eventType: 'ORDER_CREATED' | 'MOQ_REACHED',
-  entityType: 'order' | 'ngan',
+  eventType: EventItem['event_type'],
+  entityType: EventItem['entity_type'],
   entityId: string,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
+  options?: {
+    correlation_id?: string;
+    actor_id?: string;
+    actor_role?: EventItem['actor_role'];
+  }
 ): Promise<EventItem> {
+  const correlationId =
+    options?.correlation_id ||
+    (typeof payload.correlation_id === 'string' ? payload.correlation_id : undefined) ||
+    `corr_${entityType}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
   const newEvent: EventItem = {
     id: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    correlation_id: correlationId,
     event_type: eventType,
     entity_type: entityType,
     entity_id: entityId,
-    payload,
+    actor_id: options?.actor_id || 'system',
+    actor_role: options?.actor_role || 'SYSTEM',
+    payload: {
+      ...payload,
+      correlation_id: correlationId,
+    },
     status: 'PENDING',
     retry_count: 0,
     created_at: new Date().toISOString(),

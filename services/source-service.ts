@@ -87,15 +87,48 @@ export async function createSourceFromInput(input: {
 export async function updateSourceStatus(
   id: string,
   newStatus: CurationStatus,
-  notes?: string
+  notes?: string,
+  actor?: { id: string; name: string }
 ): Promise<SourceProfile | null> {
   const source = sourcesStore.find((s) => s.id === id);
   if (!source) return null;
 
+  const previousStatus = source.status;
   source.status = newStatus;
   source.updated_at = new Date().toISOString();
   if (notes) {
     source.scorecard.evaluation_summary = `${notes} (Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')})`;
+  }
+
+  // M4 Audit Foundation: Record Curation Audit Log
+  try {
+    const { AuditService } = await import('./audit-service');
+    const correlationId = `corr_curation_${source.id}_${Date.now()}`;
+    AuditService.recordAudit({
+      correlation_id: correlationId,
+      module: 'CURATION',
+      action: 'UPDATE_CURATION_STATUS',
+      actor: {
+        id: actor?.id || 'admin-quynh',
+        name: actor?.name || 'Admin Quỳnh',
+        role: 'ADMIN',
+      },
+      entity: {
+        type: 'SOURCE',
+        id: source.id,
+        code: source.producer_name,
+      },
+      from_state: previousStatus,
+      to_state: newStatus,
+      reason: notes || `Cập nhật trạng thái thẩm định sang ${newStatus}`,
+      result: 'SUCCESS',
+      metadata: {
+        scorecard: source.scorecard,
+        missing_fields: source.missing_fields,
+      },
+    });
+  } catch (err) {
+    console.warn('Curation audit recording error (non-blocking):', err);
   }
 
   return source;

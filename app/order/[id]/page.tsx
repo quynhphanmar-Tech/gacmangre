@@ -84,6 +84,65 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           </div>
         </div>
 
+        {/* Trạng thái vận hành & Giao hàng (M4 Fulfillment Timeline) */}
+        <div className="p-6 rounded-2xl bg-white border border-[#E7DFD3] space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-pantryst font-mono font-bold text-[#A65F25]">
+              HÀNH TRÌNH SẢN VẬT
+            </span>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[#FAF8F5] border border-[#E7DFD3] font-mono text-[#5C5248]">
+              {order.status === 'DELIVERED'
+                ? 'Đã giao thành công'
+                : order.status === 'SHIPPED'
+                ? 'Đang vận chuyển'
+                : 'Đã ghi nhận nhu cầu'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 pt-2 text-center text-xs font-sans">
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="w-7 h-7 rounded-full bg-[#141211] text-white flex items-center justify-center text-[10px] font-bold">
+                1
+              </div>
+              <span className="text-[11px] font-semibold text-[#141211]">Ghi nhận</span>
+              <span className="text-[9px] text-[#8C827A]">Đã mở Ngăn</span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                ['CONFIRMED', 'SHIPPED', 'DELIVERED'].includes(order.status)
+                  ? 'bg-[#141211] text-white'
+                  : 'bg-[#E7DFD3] text-[#8C827A]'
+              }`}>
+                2
+              </div>
+              <span className="text-[11px] font-semibold text-[#141211]">Chuẩn bị</span>
+              <span className="text-[9px] text-[#8C827A]">Tại nguồn</span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                ['SHIPPED', 'DELIVERED'].includes(order.status)
+                  ? 'bg-[#141211] text-white'
+                  : 'bg-[#E7DFD3] text-[#8C827A]'
+              }`}>
+                3
+              </div>
+              <span className="text-[11px] font-semibold text-[#141211]">Đang giao</span>
+              <span className="text-[9px] text-[#8C827A]">Vận chuyển</span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                order.status === 'DELIVERED'
+                  ? 'bg-emerald-700 text-white'
+                  : 'bg-[#E7DFD3] text-[#8C827A]'
+              }`}>
+                4
+              </div>
+              <span className="text-[11px] font-semibold text-[#141211]">Đã nhận</span>
+              <span className="text-[9px] text-[#8C827A]">+ Điểm tích lũy</span>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons: XEM NGĂN & CHIA SẺ NGĂN */}
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link

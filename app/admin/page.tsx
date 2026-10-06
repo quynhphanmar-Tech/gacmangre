@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Share2,
   PackageCheck,
-  Activity
+  Activity,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -84,6 +85,13 @@ export default function AdminDashboardPage() {
 
         {/* Tab Navigation & Intake/Experiment Links */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/control-tower"
+            className="px-3.5 py-2 rounded-2xl bg-[#A65F25] text-[#FAF8F5] text-xs font-semibold hover:bg-[#8C4E1E] transition whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-white" />
+            <span>CONTROL TOWER</span>
+          </Link>
           <Link
             href="/admin/experiments"
             className="px-3.5 py-2 rounded-2xl bg-[#141211] text-[#FAF8F5] text-xs font-semibold hover:bg-[#A65F25] transition whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm"

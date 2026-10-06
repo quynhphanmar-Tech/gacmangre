@@ -44,8 +44,8 @@ async function runM3Tests() {
     const data1 = await res1.json();
     assert(res1.status === 200 && data1.success, `Order ${data1.order_code} created successfully`);
 
-    // Give asynchronous event loop 300ms to dispatch
-    await sleep(300);
+    // Give asynchronous event loop 800ms to dispatch
+    await sleep(800);
 
     // Verify Event in Admin Events endpoint
     const eventsRes = await fetch(`${BASE_URL}/api/admin/events`);
