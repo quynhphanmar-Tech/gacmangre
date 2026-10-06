@@ -24,7 +24,7 @@ export default function ControlTowerPage() {
   const [searchCorrelation, setSearchCorrelation] = useState('');
   const [tracedJourney, setTracedJourney] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeView, setActiveView] = useState<'health' | 'audit_log' | 'trace' | 'matrix'>('health');
+  const [activeView, setActiveView] = useState<'health' | 'audit_log' | 'trace' | 'matrix' | 'recovery'>('health');
 
   const fetchHealthAndAudits = async () => {
     setIsLoading(true);
@@ -157,6 +157,16 @@ export default function ControlTowerPage() {
           }`}
         >
           Audit Matrix (100% Modules)
+        </button>
+        <button
+          onClick={() => setActiveView('recovery')}
+          className={`px-4 py-2 rounded-xl transition ${
+            activeView === 'recovery'
+              ? 'bg-[#A65F25] text-[#FAF8F5]'
+              : 'text-[#A65F25] hover:text-[#141211] bg-[#FAF8F5] border border-[#E7DFD3]'
+          }`}
+        >
+          Disaster Recovery & Rollback
         </button>
       </div>
 
@@ -434,6 +444,92 @@ export default function ControlTowerPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 5: DISASTER RECOVERY & ROLLBACK PROTOCOL */}
+      {activeView === 'recovery' && (
+        <div className="space-y-6">
+          {/* Recovery Overview & RPO / RTO Rules */}
+          <div className="p-6 rounded-3xl bg-[#141211] text-white space-y-4 border border-[#3E3834]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] uppercase font-mono tracking-pantryst text-[#A65F25] font-bold">
+                  DISASTER RECOVERY STANDARD
+                </span>
+                <h2 className="font-serif text-2xl font-bold mt-1">
+                  Protocol 6 Bước & RPO/RTO Khóa
+                </h2>
+              </div>
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20">
+                  RPO: &le; 24h
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20">
+                  RTO: &le; 4h
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#C2B7A8] leading-relaxed font-sans">
+              Nguyên tắc sống còn: <strong className="text-white">Không rollback khi chưa Diagnose</strong>.
+              Tuân thủ chuỗi 6 bước: <span className="font-mono text-[#EFE8DC]">01 DETECT &rarr; 02 FREEZE &rarr; 03 DIAGNOSE &rarr; 04 ROLLBACK &rarr; 05 VERIFY &rarr; 06 RESUME</span>.
+            </p>
+          </div>
+
+          {/* Rollback Matrix */}
+          <div className="p-6 rounded-3xl bg-white border border-[#E7DFD3] space-y-4">
+            <h3 className="font-serif text-lg font-bold text-[#141211]">
+              Ma Trận Phân Định Lớp Rollback (Tránh Rollback Nhầm Hệ Thống)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-1">
+                <span className="font-mono font-bold text-[#A65F25]">LỖI UI / CODE FE-BE</span>
+                <p className="text-[#665E58]">Rollback Git Release Checkpoint (Không đụng chạm DB / Order data)</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-1">
+                <span className="font-mono font-bold text-[#A65F25]">LỖI MIGRATION DB</span>
+                <p className="text-[#665E58]">Kế hoạch Migration Rollback theo script hoặc Restore Snapshot DB trước migration</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-1">
+                <span className="font-mono font-bold text-[#A65F25]">EVENT BẤT ĐỒNG BỘ THẤT BẠI</span>
+                <p className="text-[#665E58]">Replay / Retry Event Queue (Không rollback Order và không đập Core)</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-1">
+                <span className="font-mono font-bold text-[#A65F25]">MAKE / ZALO / CARRIER SẬP</span>
+                <p className="text-[#665E58]">Tạm disable Adapter, xếp hàng chờ hoặc đổi Provider. Core tiếp tục bán bình thường</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Checkpoint Retention Milestones */}
+          <div className="p-6 rounded-3xl bg-white border border-[#E7DFD3] space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-lg font-bold text-[#141211]">
+                Milestone Snapshots & Known Good State
+              </h3>
+              <span className="text-xs font-mono text-[#8C827A]">
+                Backup Retention: Daily 14 ngày &middot; Milestone dài hạn
+              </span>
+            </div>
+
+            <div className="divide-y divide-[#E7DFD3]/60 border border-[#E7DFD3] rounded-2xl overflow-hidden text-xs">
+              <div className="p-4 bg-[#FAF8F5] flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-[#141211]">v0.6.0-audit-foundation</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold font-mono">
+                      KNOWN GOOD STATE
+                    </span>
+                  </div>
+                  <p className="text-[#8C827A] font-mono text-[11px]">Git Commit: 245f181 &middot; Migration: 20261006_audit_foundation.sql</p>
+                </div>
+                <div className="flex items-center gap-2 text-right font-mono text-[11px] text-[#5C5248]">
+                  <span>Checksum: sha256_mock_init_good_state</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

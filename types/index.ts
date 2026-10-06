@@ -284,6 +284,60 @@ export interface ErrorLog {
   resolved_by?: string;
 }
 
+export type FailureLayer =
+  | 'CODE'
+  | 'DATABASE'
+  | 'MIGRATION'
+  | 'EVENT'
+  | 'AUTOMATION'
+  | 'ADAPTER'
+  | 'EXTERNAL_PROVIDER'
+  | 'DATA';
+
+export type BlastRadius = 'USER' | 'ORDER' | 'NGAN' | 'MODULE' | 'SYSTEM';
+
+export interface IncidentRecord {
+  incident_id: string;
+  detected_at: string;
+  detected_by: string;
+  module: GmrModule;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  correlation_id: string;
+  affected_entity?: {
+    type: string;
+    id: string;
+  };
+  layer: FailureLayer;
+  blast_radius: BlastRadius;
+  symptom: string;
+  root_cause?: string;
+  action_taken?: string;
+  rollback_point?: string;
+  verified_by?: string;
+  resolved_at?: string;
+  preventive_action?: string;
+  status: 'DETECTED' | 'FROZEN' | 'DIAGNOSED' | 'ROLLING_BACK' | 'VERIFYING' | 'RESOLVED';
+}
+
+export interface DisasterRecoverySnapshot {
+  snapshot_id: string;
+  timestamp: string;
+  tag: string; // e.g. v0.6.0-audit-foundation
+  git_commit: string;
+  migration_version: string;
+  rpo_target: string; // e.g. "<= 24h"
+  rto_target: string; // e.g. "<= 4h"
+  data_counts: {
+    orders: number;
+    customers: number;
+    events: number;
+    audits: number;
+    ngans: number;
+  };
+  checksum: string;
+  created_by: string;
+}
+
 
 export interface OrderInput {
   name: string;
