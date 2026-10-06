@@ -32,13 +32,47 @@ export async function GET(req: NextRequest) {
         raw_copy: 'Mật ong bạc hà Mèo Vạc Hà Giang. Giữ trọn hạt phấn hoa tự nhiên, đôi bàn tay anh Giàng A Páo quay mật trên sương muối.',
         cta_text: 'MỞ NGĂN',
       },
-      content_text: 'Mật ong bạc hà Mèo Vạc Hà Giang. Giữ trọn hạt phấn hoa tự nhiên, đôi bàn tay anh Giàng A Páo quay mật trên sương muối.',
-      commerce_context: {
-        unit_price: 280000,
-        moq: 20,
-        official_source_confirmed: true,
-        payment_terms_clarified: true,
+      asset_context: {
+        assets: [
+          {
+            asset_id: 'AST-HERO-001',
+            url: '/1791301980993_1495576537881552819_558378821601381069_143eb3245c6b738be2eb1f62e19ba28d.jpg',
+            asset_type: 'DOCUMENTARY',
+            source: 'Thực địa Mèo Vạc 2026',
+            license: 'GacMangRe Exclusive',
+            credit: 'Ảnh thực địa',
+            is_verified: true,
+            provenance_valid: true,
+            role_in_story: 'evidence',
+          },
+          {
+            asset_id: 'AST-HANDS-002',
+            url: '/1791301986003_1495576537881552819_558378821601381069_1f3c1a0ef69780ef4531cdc9d21bff6a.jpg',
+            asset_type: 'SOURCE',
+            source: 'Anh Páo quay mật',
+            license: 'Producer Authorized',
+            credit: 'Giàng A Páo',
+            provenance_valid: true,
+            role_in_story: 'context',
+          },
+        ],
       },
+      commerce_context: {
+        producer_retail_truth: {
+          suggested_retail_price: 300000,
+          producer_confirmed_capacity: 50,
+          producer_source_confirmed: true,
+          source_ref: 'Hợp tác xã Mật ong hoa bạc hà Mèo Vạc',
+        },
+        gmr_commerce_rules: {
+          batch_moq: 20,
+          gmr_selling_price: 280000,
+          producer_discount_pct: 6.7,
+          customer_benefit_note: 'Mở theo mẻ chia sẻ chi phí vận chuyển',
+          payment_terms_clarified: true,
+        },
+      },
+
       ux_context: {
         body_font_size_px: 16,
         touch_target_size_px: 48,

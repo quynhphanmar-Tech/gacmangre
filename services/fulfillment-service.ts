@@ -66,8 +66,9 @@ export class FulfillmentService {
 
     // Idempotent acknowledgement if already in target status
     if (currentStatus === targetStatus) {
-      return { success: true, fulfillment };
+      return { success: true, fulfillment, points_awarded: 0 };
     }
+
 
     // Validate state transition
     if (!isValidTransition(currentStatus, targetStatus)) {

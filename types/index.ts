@@ -818,19 +818,31 @@ export interface ExperienceGovernanceInput {
     assets: {
       asset_id: string;
       url: string;
+      asset_type: AssetType; // DOCUMENTARY | SOURCE | EDITORIAL | AI_GENERATED
       source: string;
       license: string;
       credit: string;
-      is_verified: boolean;
+      is_verified?: boolean; // Required for DOCUMENTARY
       provenance_valid: boolean;
+      role_in_story?: 'evidence' | 'context' | 'editorial' | 'concept_mood';
     }[];
   };
   commerce_context?: {
-    unit_price: number;
-    moq: number;
-    official_source_confirmed: boolean;
-    payment_terms_clarified: boolean;
+    producer_retail_truth: {
+      suggested_retail_price: number;
+      producer_confirmed_capacity?: number;
+      producer_source_confirmed: boolean;
+      source_ref?: string;
+    };
+    gmr_commerce_rules: {
+      batch_moq: number; // GMR Demand / Commerce Rule
+      gmr_selling_price: number; // Calibrated unit price for group-buy
+      producer_discount_pct?: number;
+      customer_benefit_note?: string;
+      payment_terms_clarified: boolean;
+    };
   };
+
   ux_context?: {
     body_font_size_px: number;
     touch_target_size_px: number;
