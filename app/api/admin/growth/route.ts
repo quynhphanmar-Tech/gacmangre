@@ -16,8 +16,23 @@ export async function GET(req: NextRequest) {
     }
 
     if (producer_id) {
-      const assets = producerGrowthService.getWorkbenchAssets(producer_id);
-      return NextResponse.json({ success: true, assets });
+      const mode = searchParams.get('mode');
+      if (mode === 'feedback') {
+        const feedback = producerGrowthService.getUatFeedback(producer_id);
+        return NextResponse.json({ success: true, feedback });
+      }
+      if (mode === 'assets') {
+        const assets = producerGrowthService.getWorkbenchAssets(producer_id);
+        return NextResponse.json({ success: true, assets });
+      }
+
+      // Default: return run for this producer
+      const run = producerGrowthService.getProducerRun(producer_id);
+      const feedback = producerGrowthService.getUatFeedback(producer_id);
+      if (!run) {
+        return NextResponse.json({ success: false, error: `No growth run found for producer: ${producer_id}` }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, run, feedback });
     }
 
     return NextResponse.json({
@@ -51,6 +66,17 @@ export async function POST(req: NextRequest) {
     if (action === 'RUN_ANALYSIS') {
       const output = await producerGrowthService.runGrowthAnalysis(body.input);
       return NextResponse.json({ success: true, output });
+    }
+
+    if (action === 'SAVE_UAT_FEEDBACK') {
+      const record = producerGrowthService.saveUatFeedback({
+        producer_id: body.producer_id,
+        object_type: body.object_type,
+        object_id: body.object_id,
+        decision: body.decision,
+        note: body.note,
+      });
+      return NextResponse.json({ success: true, record });
     }
 
     if (action === 'SAVE_WORKBENCH_ASSET') {

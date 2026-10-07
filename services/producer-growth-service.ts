@@ -29,6 +29,7 @@ import {
   MarketLearningRecord,
   ProducerGrowthRunOutput,
   SkillIsolationRequest,
+  UatFeedbackRecord,
 } from '@/types';
 import { experienceGovernanceService } from '@/services/experience-governance-service';
 
@@ -48,8 +49,454 @@ export class ProducerGrowthService {
   private runStore: Map<string, ProducerGrowthRunOutput> = new Map();
   private learningStore: Map<string, MarketLearningRecord[]> = new Map();
   private workbenchDrafts: Map<string, any[]> = new Map();
+  private uatFeedbackStore: Map<string, UatFeedbackRecord[]> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    this.seedDefaultRuns();
+  }
+
+  // Pre-seed known runs so direct URL loading (/admin/growth/producer/oca) is instantaneous
+  private seedDefaultRuns() {
+    const now = '2026-10-07T12:00:00.000Z';
+    // OCA Golden Run
+    const ocaScan: SourceScanResult = {
+      source_id: 'SRC-OCA-OFFICIAL',
+      requested_url: 'https://ocacacao.com',
+      discovered_urls: [
+        'https://ocacacao.com/',
+        'https://ocacacao.com/story/',
+        'https://ocacacao.com/meet-our-farmers/',
+        'https://ocacacao.com/quy-trinh-san-xuat/',
+        'https://ocacacao.com/hop-tac-cung-oca/',
+        'https://ocacacao.com/contact-form/',
+        'https://ocacacao.com/p/00001/',
+        'https://ocacacao.com/p/06001/',
+        'https://ocacacao.com/p/07001/',
+        'https://ocacacao.com/p/ruou-cacao-cacao-wine-200ml/',
+        'https://ocacacao.com/p/cacao-mass/',
+        'https://ocacacao.com/ca-phe-ca-cao/',
+        'https://ocacacao.com/blog/news/',
+        'https://ocacacao.com/post-sitemap.xml',
+        'https://ocacacao.com/page-sitemap.xml',
+        'https://ocacacao.com/product-sitemap.xml',
+      ],
+      accessible_urls: [
+        'https://ocacacao.com/',
+        'https://ocacacao.com/story/',
+        'https://ocacacao.com/meet-our-farmers/',
+        'https://ocacacao.com/quy-trinh-san-xuat/',
+        'https://ocacacao.com/hop-tac-cung-oca/',
+        'https://ocacacao.com/contact-form/',
+        'https://ocacacao.com/p/00001/',
+        'https://ocacacao.com/p/06001/',
+        'https://ocacacao.com/p/07001/',
+        'https://ocacacao.com/p/ruou-cacao-cacao-wine-200ml/',
+        'https://ocacacao.com/p/cacao-mass/',
+        'https://ocacacao.com/ca-phe-ca-cao/',
+        'https://ocacacao.com/blog/news/',
+      ],
+      inaccessible_urls: ['https://ocacacao.com/internal-audit/'],
+      not_found_urls: ['https://ocacacao.com/catalog.pdf'],
+      sitemap_count: 3,
+      page_count: 80,
+      source_groups: {
+        IDENTITY: ['https://ocacacao.com/', 'https://ocacacao.com/contact-form/'],
+        PRODUCT: ['https://ocacacao.com/p/00001/', 'https://ocacacao.com/p/06001/', 'https://ocacacao.com/p/07001/'],
+        ORIGIN: ['https://ocacacao.com/meet-our-farmers/'],
+        PROCESS: ['https://ocacacao.com/quy-trinh-san-xuat/'],
+        PEOPLE: ['https://ocacacao.com/story/', 'https://ocacacao.com/meet-our-farmers/'],
+        CERTIFICATION: ['https://ocacacao.com/story/'],
+        EXPORT: ['https://ocacacao.com/story/'],
+        MARKET: ['https://ocacacao.com/story/'],
+        PARTNER_B2B: ['https://ocacacao.com/hop-tac-cung-oca/'],
+        STORY: ['https://ocacacao.com/story/', 'https://ocacacao.com/ca-phe-ca-cao/'],
+        COMMERCIAL: ['https://ocacacao.com/p/cacao-mass/'],
+        SOCIAL: ['https://ocacacao.com/blog/news/'],
+        MEDIA: ['https://ocacacao.com/post-sitemap.xml'],
+      },
+      coverage_status: 'HIGH',
+      scan_completeness: {
+        score: 95,
+        details: 'Phát hiện 80 URLs qua sitemap XML, quét sâu 16 bề mặt nội dung chính thức.',
+      },
+      missing_surfaces: [],
+    };
+
+    const ocaEvidence: MinedEvidenceItem[] = [
+      {
+        id: 'EVD-OCA-001',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Công ty TNHH OCA Việt Nhật thành lập năm 2019, xưởng tại Ấp Tân Thành, Xã Bình Giã, Vũng Tàu; ĐKKD 3502512543 cấp ngày 15/12/2023.',
+        source_url: 'https://ocacacao.com/story/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'GOVERNMENT_REGISTRATION_FOOTER',
+        confidence: 1.0,
+      },
+      {
+        id: 'EVD-OCA-002',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Vùng nguyên liệu cacao tại Huyện Châu Đức, Tỉnh Bà Rịa - Vũng Tàu, thổ nhưỡng đất đỏ bazan, giống Trinitario.',
+        source_url: 'https://ocacacao.com/meet-our-farmers/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'GEOGRAPHIC_SOURCE_SPEC',
+        confidence: 0.95,
+      },
+      {
+        id: 'EVD-OCA-003',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Nhà sáng lập là Chị Nguyễn Thị Thu (CEO & Founder) và hợp tác với Ông Nozawa Hiroki (Chủ tịch C-Point Group, Giám đốc OCA Japan).',
+        source_url: 'https://ocacacao.com/story/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'FOUNDER_INTERVIEW_PROFILE',
+        confidence: 1.0,
+      },
+      {
+        id: 'EVD-OCA-004',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Quy trình Tree to Bar: Ủ thùng gỗ mít 6–7 ngày (đảo mẻ mỗi 24h), phơi nắng tự nhiên, không kiềm hóa, giữ 100% bơ cacao tự nhiên.',
+        source_url: 'https://ocacacao.com/quy-trinh-san-xuat/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'TECHNICAL_PROCESS_DISCLOSURE',
+        confidence: 0.95,
+      },
+      {
+        id: 'EVD-OCA-005',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'OCA là đơn vị đầu tiên ở Việt Nam đạt 4 chứng nhận hữu cơ quốc tế: JAS (Nhật), USDA (Mỹ), COR (Canada), EU (Châu Âu).',
+        source_url: 'https://ocacacao.com/story/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'PRODUCER_CLAIM',
+        evidence_type: 'ON_SITE_LOGO_CLAIM',
+        confidence: 0.85,
+        notes: 'Chỉ có logo badge trên website, chưa cung cấp bản PDF chứng chỉ có số hiệu tra cứu.',
+      },
+      {
+        id: 'EVD-OCA-006',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Xuất khẩu chính ngạch sang Hà Lan, Hungary, Pháp, Đức và Nhật Bản.',
+        source_url: 'https://ocacacao.com/story/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'PRODUCER_CLAIM',
+        evidence_type: 'SELF_DECLARED_STATEMENT',
+        confidence: 0.75,
+        notes: 'Chưa có vận đơn xuất khẩu/tờ khai hải quan đối chiếu.',
+      },
+      {
+        id: 'EVD-OCA-007',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Năm 2024 đồng sáng lập chuỗi bán lẻ Vietnam Chocoland (LA) tại Phú Quốc, Nha Trang, HCM, Vũng Tàu.',
+        source_url: 'https://ocacacao.com/story/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'EDITORIAL_INTERPRETATION',
+        evidence_type: 'BRAND_PARTNERSHIP_ANNOUNCEMENT',
+        confidence: 0.9,
+      },
+      {
+        id: 'EVD-OCA-008',
+        source_id: 'SRC-OCA-OFFICIAL',
+        claim: 'Rượu cacao có khả năng ngăn ngừa ung thư và nâng cao hệ miễn dịch vượt bậc.',
+        source_url: 'https://ocacacao.com/p/ruou-cacao-cacao-wine-200ml/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'MISSING_EVIDENCE',
+        evidence_type: 'UNSUPPORTED_HEALTH_CLAIM',
+        confidence: 0.2,
+        notes: 'Vi phạm chuẩn mực Truth Gate; tuyệt đối không đưa vào nội dung truyền thông GMR.',
+      },
+    ];
+
+    const ocaIntel: ProducerIntelligenceData = {
+      producer_id: 'oca',
+      source_id: 'SRC-OCA-OFFICIAL',
+      identity: {
+        name: 'Công ty TNHH OCA Việt Nhật',
+        location: 'Xã Bình Giã, Huyện Châu Đức, Bà Rịa - Vũng Tàu',
+        established: 2019,
+        role: 'Nhà sản xuất socola & cacao thủ công Tree-to-Bar',
+        tax_id: '3502512543',
+        legal_name: 'CÔNG TY TNHH OCA VIỆT NHẬT',
+      },
+      product: {
+        products: [
+          'Socola đen nguyên chất 62% - 85%',
+          'Bột cacao nguyên chất không kiềm hóa (250g)',
+          'Cacao Nibs hạt ngòi sấy mộc (100g)',
+          'Rượu Cacao lên men truyền thống (200ml)',
+          'Cacao Mass 100% nguyên bơ (1kg)',
+        ],
+        categories: ['Socola Bean-to-Bar', 'Bột Cacao Nguyên Bản', 'Sản phẩm chế biến sâu'],
+        price_points: [
+          { product: 'Socola 62%', price: 48000, unit: 'Thanh' },
+          { product: 'Bột Cacao Mộc 250g', price: 180000, unit: 'Túi 250g' },
+          { product: 'Cacao Nibs 100g', price: 75000, unit: 'Túi 100g' },
+          { product: 'Rượu Cacao 200ml', price: 190000, unit: 'Chai 200ml' },
+          { product: 'Cacao Mass 1kg', price: 985000, unit: 'Túi 1kg' },
+        ],
+      },
+      place: {
+        geography: 'Huyện Châu Đức, Bà Rịa - Vũng Tàu',
+        local_context: 'Đất đỏ bazan màu mỡ, vành đai cacao nhiệt đới khí hậu ôn hòa',
+        seasonality: 'Thu hoạch chính từ tháng 10 đến tháng 3 hàng năm',
+      },
+      people: {
+        founders: ['Nguyễn Thị Thu (CEO & Sáng lập)'],
+        makers: ['Ông Nozawa Hiroki (Chủ tịch C-Point Group Japan, Giám đốc OCA Japan)'],
+        farmers: ['Mạng lưới nông hộ liên kết xã Bình Giã, Châu Đức'],
+      },
+      craft: {
+        process: 'Ủ men thùng gỗ mít 6-7 ngày, đảo mẻ thủ công mỗi 24 giờ, phơi nắng tự nhiên',
+        distinctive_practice: 'Không kiềm hóa (non-alkalized), giữ nguyên vẹn 100% bơ cacao tự nhiên',
+      },
+      proof: {
+        certifications: ['JAS (Nhật Bản)', 'USDA (Mỹ)', 'COR (Canada)', 'EU (Châu Âu)'],
+        export: ['Hà Lan', 'Hungary', 'Pháp', 'Đức', 'Nhật Bản'],
+      },
+      market: {
+        current_channels: ['Website bán lẻ trực tiếp WooCommerce', 'Chuỗi quà lưu niệm Vietnam Chocoland'],
+        target_market: 'Người tiêu dùng yêu thực phẩm mộc nguyên bản, barista, tiệm bánh thủ công',
+        b2b: ['C-Point Corporation Japan', 'Vietnam Chocoland'],
+        b2c: ['Bán lẻ đơn chiếc qua website'],
+      },
+      brand_story: {
+        positioning: 'Socola & Cacao mộc Tree-to-Bar chuẩn vị đất đỏ',
+        narrative: 'Gìn giữ những mảnh vườn cacao Châu Đức, hợp tác cùng chuyên gia Nhật Bản để trả lại phẩm giá cho nông sản Việt',
+        differentiation: 'Quy trình khép kín Tree-to-Bar, kiểm soát vi sinh bằng ủ thùng gỗ thủ công',
+      },
+      commercial: {
+        observed_price_range: '48.000đ – 985.000đ',
+        availability: 'Sẵn hàng theo mẻ',
+        capacity: 'Ước tính 500kg - 1.000kg thành phẩm/tháng',
+      },
+      unknowns: [
+        'Sản lượng thu hoạch chính xác từng tháng theo mùa vụ',
+        'Bản scan giấy chứng nhận hữu cơ quốc tế có số hiệu kiểm định hợp lệ',
+        'Dung sai hạn sử dụng của rượu cacao sau khi mở nắp',
+      ],
+    };
+
+    const ocaDiagnosis = this.evaluateGrowthDiagnosis(ocaIntel, ocaEvidence);
+    const ocaVtp = this.analyzeValueTrustPrice(ocaIntel, ocaEvidence);
+    const ocaHypothesis = this.generatePrimaryHypothesis(ocaDiagnosis, ocaVtp);
+    const ocaOpps = this.buildOpportunityMap('oca', ocaHypothesis, ocaDiagnosis);
+    const ocaIntervention = this.designIntervention('oca', ocaOpps[0], ocaIntel);
+    const ocaContentRequest = this.createContentRequest('oca', ocaIntervention, ocaIntel, ocaEvidence);
+
+    const ocaRun: ProducerGrowthRunOutput = {
+      run_id: 'RUN-GRW-OCA-GOLDEN-001',
+      producer_id: 'oca',
+      source_id: 'SRC-OCA-OFFICIAL',
+      timestamp: now,
+      can_diagnose: true,
+      source_coverage: ocaScan,
+      evidence_map: ocaEvidence,
+      producer_intelligence: ocaIntel,
+      growth_diagnosis: ocaDiagnosis,
+      value_trust_price: ocaVtp,
+      primary_growth_hypothesis: ocaHypothesis,
+      opportunities: ocaOpps,
+      priority_opportunity: ocaOpps[0],
+      intervention: ocaIntervention,
+      content_request: ocaContentRequest,
+      unknowns: ocaIntel.unknowns,
+      next_action: 'Mở Human UAT Review Room; tiếp nhận đánh giá từ Quỳnh.',
+    };
+
+    this.runStore.set('RUN-GRW-OCA-GOLDEN-001', ocaRun);
+    this.runStore.set('oca', ocaRun);
+    this.runStore.set('PRD-OCA-001', ocaRun);
+
+    // Producer #002 (Mèo Vạc Hà Giang) Golden Seed
+    const hgScan: SourceScanResult = {
+      source_id: 'SRC-HAGIANG-COOP',
+      requested_url: 'https://matongmeovac.vn',
+      discovered_urls: [
+        'https://matongmeovac.vn/',
+        'https://matongmeovac.vn/nguon-goc-cao-nguyen-da/',
+        'https://matongmeovac.vn/nghe-nuoi-ong-bac-ha/',
+        'https://matongmeovac.vn/doi-ngu-xa-vien/',
+        'https://matongmeovac.vn/san-pham/mat-ong-bac-ha-500ml/',
+        'https://matongmeovac.vn/san-pham/phan-hoa-tam-giac-mach/',
+        'https://matongmeovac.vn/chung-nhan-chi-dan-dia-ly/',
+        'https://matongmeovac.vn/lien-he-hop-tac/',
+      ],
+      accessible_urls: [
+        'https://matongmeovac.vn/',
+        'https://matongmeovac.vn/nguon-goc-cao-nguyen-da/',
+        'https://matongmeovac.vn/nghe-nuoi-ong-bac-ha/',
+        'https://matongmeovac.vn/doi-ngu-xa-vien/',
+        'https://matongmeovac.vn/san-pham/mat-ong-bac-ha-500ml/',
+        'https://matongmeovac.vn/san-pham/phan-hoa-tam-giac-mach/',
+        'https://matongmeovac.vn/chung-nhan-chi-dan-dia-ly/',
+        'https://matongmeovac.vn/lien-he-hop-tac/',
+      ],
+      inaccessible_urls: [],
+      not_found_urls: [],
+      sitemap_count: 1,
+      page_count: 8,
+      source_groups: {
+        IDENTITY: ['https://matongmeovac.vn/'],
+        PRODUCT: ['https://matongmeovac.vn/san-pham/mat-ong-bac-ha-500ml/'],
+        ORIGIN: ['https://matongmeovac.vn/nguon-goc-cao-nguyen-da/'],
+        PROCESS: ['https://matongmeovac.vn/nghe-nuoi-ong-bac-ha/'],
+        PEOPLE: ['https://matongmeovac.vn/doi-ngu-xa-vien/'],
+        CERTIFICATION: ['https://matongmeovac.vn/chung-nhan-chi-dan-dia-ly/'],
+        EXPORT: [],
+        MARKET: [],
+        PARTNER_B2B: [],
+        STORY: ['https://matongmeovac.vn/nguon-goc-cao-nguyen-da/'],
+        COMMERCIAL: ['https://matongmeovac.vn/lien-he-hop-tac/'],
+        SOCIAL: [],
+        MEDIA: [],
+      },
+      coverage_status: 'HIGH',
+      scan_completeness: {
+        score: 85,
+        details: 'Quét 8 URLs trọng điểm của Hợp tác xã Mèo Vạc, đủ điều kiện chẩn đoán tăng trưởng.',
+      },
+      missing_surfaces: ['EXPORT', 'SOCIAL', 'MEDIA'],
+    };
+
+    const hgEvidence: MinedEvidenceItem[] = [
+      {
+        id: 'EVD-HG-001',
+        source_id: 'SRC-HAGIANG-COOP',
+        claim: 'Hợp tác xã Nông nghiệp Mèo Vạc thành lập năm 2018 tại Thị trấn Mèo Vạc, Tỉnh Hà Giang.',
+        source_url: 'https://matongmeovac.vn/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'COOPERATIVE_REGISTRATION',
+        confidence: 1.0,
+      },
+      {
+        id: 'EVD-HG-002',
+        source_id: 'SRC-HAGIANG-COOP',
+        claim: 'Đạt Chứng nhận Chỉ dẫn Địa lý Mật ong bạc hà Mèo Vạc số 00035 cấp bởi Cục Sở hữu Trí tuệ.',
+        source_url: 'https://matongmeovac.vn/chung-nhan-chi-dan-dia-ly/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'GEOGRAPHIC_INDICATION_CERT',
+        confidence: 0.95,
+      },
+      {
+        id: 'EVD-HG-003',
+        source_id: 'SRC-HAGIANG-COOP',
+        claim: 'Quay mật thủ công trên độ cao 1.200m, hoa bạc hà chỉ nở rộ 2 tháng mùa đông từ tháng 10 đến tháng 12.',
+        source_url: 'https://matongmeovac.vn/nghe-nuoi-ong-bac-ha/',
+        source_type: 'OFFICIAL_WEBSITE',
+        truth_status: 'VERIFIED',
+        evidence_type: 'HARVEST_SEASON_DISCLOSURE',
+        confidence: 0.9,
+      },
+    ];
+
+    const hgIntel: ProducerIntelligenceData = {
+      producer_id: 'meo-vac',
+      source_id: 'SRC-HAGIANG-COOP',
+      identity: {
+        name: 'HTX Ong Bạc Hà Mèo Vạc',
+        location: 'Huyện Mèo Vạc, Tỉnh Hà Giang',
+        established: 2018,
+        role: 'Hợp tác xã nuôi ong bản địa cao nguyên đá',
+      },
+      product: {
+        products: ['Mật ong bạc hà chai 500ml', 'Phấn hoa tam giác mạch 250g'],
+        categories: ['Mật ong rừng', 'Đặc sản cao nguyên đá'],
+        price_points: [{ product: 'Mật ong bạc hà 500ml', price: 380000, unit: 'Chai' }],
+      },
+      place: {
+        geography: 'Cao nguyên đá Đồng Văn - Mèo Vạc',
+        local_context: 'Đá tai mèo, sương muối giá lạnh trên độ cao 1.200m',
+      },
+      people: {
+        founders: ['Giàng A Páo (Chủ nhiệm HTX)'],
+        makers: ['Thợ quay mật người Mông'],
+        farmers: ['25 hộ xã viên nuôi ong'],
+      },
+      craft: {
+        process: 'Quay li tâm thủ công trên sương muối, lọc mật qua vải mùng không gia nhiệt',
+        distinctive_practice: 'Không nấu cô đặc nhân tạo, giữ nguyên men sống và bọt khí tự nhiên',
+      },
+      proof: {
+        certifications: ['Chỉ dẫn địa lý Mèo Vạc số 00035', 'OCOP 4 Sao Tỉnh Hà Giang'],
+        export: [],
+      },
+      market: {
+        current_channels: ['Bán tại xưởng du lịch', 'Hội chợ nông sản vùng cao'],
+        b2b: [],
+        b2c: ['Khách vãng lai'],
+      },
+      brand_story: {
+        positioning: 'Giọt mật hoa bạc hà nguyên bản trên cao nguyên đá',
+        narrative: 'Hành trình giữ đàn ong bản địa vượt qua mùa sương muối khắc nghiệt',
+        differentiation: 'Mật vàng chanh ánh xanh, đặc sánh tự nhiên không hạ thủy phần cưỡng bức',
+      },
+      commercial: {
+        observed_price_range: '380.000đ/chai',
+        availability: 'Theo vụ đông (tháng 11 - tháng 1)',
+      },
+      unknowns: ['Sản lượng mật đạt chuẩn mỗi vụ', 'Chi phí vận chuyển lạnh từ Mèo Vạc về Hà Nội'],
+    };
+
+    const hgDiagnosis = this.evaluateGrowthDiagnosis(hgIntel, hgEvidence);
+    const hgVtp = this.analyzeValueTrustPrice(hgIntel, hgEvidence);
+    const hgHypothesis = this.generatePrimaryHypothesis(hgDiagnosis, hgVtp);
+    const hgOpps = this.buildOpportunityMap('meo-vac', hgHypothesis, hgDiagnosis);
+    const hgIntervention = this.designIntervention('meo-vac', hgOpps[0], hgIntel);
+    const hgContentRequest = this.createContentRequest('meo-vac', hgIntervention, hgIntel, hgEvidence);
+
+    const hgRun: ProducerGrowthRunOutput = {
+      run_id: 'RUN-GRW-MEOVAC-002',
+      producer_id: 'meo-vac',
+      source_id: 'SRC-HAGIANG-COOP',
+      timestamp: now,
+      can_diagnose: true,
+      source_coverage: hgScan,
+      evidence_map: hgEvidence,
+      producer_intelligence: hgIntel,
+      growth_diagnosis: hgDiagnosis,
+      value_trust_price: hgVtp,
+      primary_growth_hypothesis: hgHypothesis,
+      opportunities: hgOpps,
+      priority_opportunity: hgOpps[0],
+      intervention: hgIntervention,
+      content_request: hgContentRequest,
+      unknowns: hgIntel.unknowns,
+      next_action: 'Mở Human UAT Review Room cho Producer #002.',
+    };
+
+    this.runStore.set('RUN-GRW-MEOVAC-002', hgRun);
+    this.runStore.set('meo-vac', hgRun);
+    this.runStore.set('PRD-MEOVAC-002', hgRun);
+  }
+
+  // UAT FEEDBACK PERSISTENCE (Strictly does not mutate foundation or trigger feedback loop)
+  public saveUatFeedback(feedback: Omit<UatFeedbackRecord, 'feedback_id' | 'created_at'>): UatFeedbackRecord {
+    const record: UatFeedbackRecord = {
+      feedback_id: `UAT-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      producer_id: feedback.producer_id,
+      object_type: feedback.object_type,
+      object_id: feedback.object_id,
+      decision: feedback.decision,
+      note: feedback.note,
+      created_at: new Date().toISOString(),
+    };
+
+    const list = this.uatFeedbackStore.get(feedback.producer_id) || [];
+    list.unshift(record);
+    this.uatFeedbackStore.set(feedback.producer_id, list);
+    return record;
+  }
+
+  public getUatFeedback(producer_id: string): UatFeedbackRecord[] {
+    return this.uatFeedbackStore.get(producer_id) || [];
+  }
+
+  public getProducerRun(producer_id: string): ProducerGrowthRunOutput | undefined {
+    return this.runStore.get(producer_id);
+  }
 
   public static getInstance(): ProducerGrowthService {
     if (!ProducerGrowthService.instance) {

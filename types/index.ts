@@ -1158,6 +1158,18 @@ export interface SkillIsolationRequest {
   attempted_mutation?: string;
 }
 
+export type UatDecision = 'CORRECT' | 'REVIEW' | 'INCORRECT';
+
+export interface UatFeedbackRecord {
+  feedback_id: string;
+  producer_id: string;
+  object_type: 'EVIDENCE' | 'DIAGNOSIS' | 'HYPOTHESIS' | 'OPPORTUNITY' | 'INTERVENTION' | 'CONTENT_REQUEST';
+  object_id: string;
+  decision: UatDecision;
+  note?: string;
+  created_at: string;
+}
+
 
 
 
