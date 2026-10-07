@@ -26,13 +26,27 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ success: true, assets });
       }
 
+      if (mode === 'market_validation') {
+        const validationFeedback = producerGrowthService.getMarketValidationFeedback(producer_id);
+        const learnings = producerGrowthService.getInternalMarketLearning(producer_id);
+        return NextResponse.json({ success: true, validation_feedback: validationFeedback, learnings });
+      }
+
       // Default: return run for this producer
       const run = producerGrowthService.getProducerRun(producer_id);
       const feedback = producerGrowthService.getUatFeedback(producer_id);
+      const validationFeedback = producerGrowthService.getMarketValidationFeedback(producer_id);
+      const learnings = producerGrowthService.getInternalMarketLearning(producer_id);
       if (!run) {
         return NextResponse.json({ success: false, error: `No growth run found for producer: ${producer_id}` }, { status: 404 });
       }
-      return NextResponse.json({ success: true, run, feedback });
+      return NextResponse.json({
+        success: true,
+        run,
+        feedback,
+        validation_feedback: validationFeedback,
+        learnings,
+      });
     }
 
     return NextResponse.json({
@@ -82,6 +96,30 @@ export async function POST(req: NextRequest) {
     if (action === 'SAVE_WORKBENCH_ASSET') {
       const asset = producerGrowthService.saveWorkbenchAsset(body.producer_id, body.asset);
       return NextResponse.json({ success: true, asset });
+    }
+
+    if (action === 'SAVE_MARKET_VALIDATION_FEEDBACK') {
+      const record = producerGrowthService.saveMarketValidationFeedback({
+        producer_id: body.producer_id,
+        target_pillar: body.target_pillar,
+        object_id: body.object_id,
+        decision: body.decision,
+        comment: body.comment,
+        reviewer: body.reviewer,
+      });
+      return NextResponse.json({ success: true, record });
+    }
+
+    if (action === 'RECORD_INTERNAL_MARKET_LEARNING') {
+      const record = producerGrowthService.recordInternalMarketLearning({
+        producer_id: body.producer_id,
+        target_pillar: body.target_pillar,
+        observation: body.observation,
+        interpretation: body.interpretation,
+        hypothesis: body.hypothesis,
+        next_test: body.next_test,
+      });
+      return NextResponse.json({ success: true, record });
     }
 
     if (action === 'RECORD_MARKET_LEARNING') {

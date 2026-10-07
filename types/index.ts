@@ -1275,6 +1275,36 @@ export interface UatFeedbackRecord {
   created_at: string;
 }
 
+export type MarketValidationDecision =
+  | 'CLEAR'
+  | 'UNCLEAR'
+  | 'NOT_CONVINCING'
+  | 'WRONG'
+  | 'MISSING_EVIDENCE';
+
+export interface MarketValidationFeedbackRecord {
+  id: string;
+  producer_id: string;
+  target_pillar: 'CUSTOMER_OUTCOME' | 'PRODUCER_OUTCOME' | 'GROWTH_SNAPSHOT';
+  object_id: string;
+  decision: MarketValidationDecision;
+  comment?: string;
+  reviewer: string;
+  created_at: string;
+}
+
+export interface InternalMarketLearningRecord {
+  id: string;
+  producer_id: string;
+  source: 'INTERNAL_TEST';
+  target_pillar: 'CUSTOMER_OUTCOME' | 'PRODUCER_OUTCOME' | 'GROWTH_SNAPSHOT';
+  observation: string;
+  interpretation: string;
+  hypothesis: string;
+  next_test: string;
+  created_at: string;
+}
+
 
 
 

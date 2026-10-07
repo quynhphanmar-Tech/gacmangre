@@ -36,6 +36,8 @@ import {
   ProducerOutcomePartnershipCase,
   EpistemicStatement,
   ValueExchangeItem,
+  MarketValidationFeedbackRecord,
+  InternalMarketLearningRecord,
 } from '@/types';
 import { experienceGovernanceService } from '@/services/experience-governance-service';
 
@@ -56,6 +58,8 @@ export class ProducerGrowthService {
   private learningStore: Map<string, MarketLearningRecord[]> = new Map();
   private workbenchDrafts: Map<string, any[]> = new Map();
   private uatFeedbackStore: Map<string, UatFeedbackRecord[]> = new Map();
+  private marketValidationStore: Map<string, MarketValidationFeedbackRecord[]> = new Map();
+  private internalMarketLearningStore: Map<string, InternalMarketLearningRecord[]> = new Map();
 
   private constructor() {
     this.seedDefaultRuns();
@@ -522,6 +526,53 @@ export class ProducerGrowthService {
 
   public getUatFeedback(producer_id: string): UatFeedbackRecord[] {
     return this.uatFeedbackStore.get(producer_id) || [];
+  }
+
+  // MARKET VALIDATION FEEDBACK PERSISTENCE (v0.1 Internal Market Test)
+  public saveMarketValidationFeedback(feedback: Omit<MarketValidationFeedbackRecord, 'id' | 'created_at'>): MarketValidationFeedbackRecord {
+    const record: MarketValidationFeedbackRecord = {
+      id: `MVF-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      producer_id: feedback.producer_id,
+      target_pillar: feedback.target_pillar,
+      object_id: feedback.object_id,
+      decision: feedback.decision,
+      comment: feedback.comment,
+      reviewer: feedback.reviewer || 'Internal Reviewer',
+      created_at: new Date().toISOString(),
+    };
+
+    const list = this.marketValidationStore.get(feedback.producer_id) || [];
+    list.unshift(record);
+    this.marketValidationStore.set(feedback.producer_id, list);
+    return record;
+  }
+
+  public getMarketValidationFeedback(producer_id: string): MarketValidationFeedbackRecord[] {
+    return this.marketValidationStore.get(producer_id) || [];
+  }
+
+  // INTERNAL MARKET LEARNING RECORD (Observation -> Interpretation -> Hypothesis -> Next Test)
+  public recordInternalMarketLearning(learning: Omit<InternalMarketLearningRecord, 'id' | 'source' | 'created_at'>): InternalMarketLearningRecord {
+    const record: InternalMarketLearningRecord = {
+      id: `IML-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      producer_id: learning.producer_id,
+      source: 'INTERNAL_TEST',
+      target_pillar: learning.target_pillar,
+      observation: learning.observation,
+      interpretation: learning.interpretation,
+      hypothesis: learning.hypothesis,
+      next_test: learning.next_test,
+      created_at: new Date().toISOString(),
+    };
+
+    const list = this.internalMarketLearningStore.get(learning.producer_id) || [];
+    list.unshift(record);
+    this.internalMarketLearningStore.set(learning.producer_id, list);
+    return record;
+  }
+
+  public getInternalMarketLearning(producer_id: string): InternalMarketLearningRecord[] {
+    return this.internalMarketLearningStore.get(producer_id) || [];
   }
 
   public getProducerRun(producer_id: string): ProducerGrowthRunOutput | undefined {
