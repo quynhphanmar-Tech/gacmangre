@@ -95,7 +95,63 @@ async function runHumanUatAcceptanceSuite() {
   assert(Boolean(run.content_request.target_behavior), 'Content request specifies target behavior');
   assert(Boolean(run.content_request.cta), 'Content request specifies CTA');
 
-  console.log('  🟢 [A] OCA Golden UAT: ALL 10 SECTIONS VERIFIED 100%\n');
+  // 11. Growth Decision Layer (v0.2)
+  assert(Boolean(run.decision_layer), 'Decision Layer is present in run output');
+  const dl = run.decision_layer;
+
+  // Growth Snapshot (<60s synthesis)
+  assert(Boolean(dl.snapshot.what_we_see), 'Snapshot specifies What We See');
+  assert(Boolean(dl.snapshot.why), 'Snapshot specifies Why');
+  assert(Boolean(dl.snapshot.primary_hypothesis), 'Snapshot specifies Primary Hypothesis');
+  assert(Boolean(dl.snapshot.customer_outcome), 'Snapshot specifies Customer Outcome');
+  assert(Boolean(dl.snapshot.producer_outcome), 'Snapshot specifies Producer Outcome');
+  assert(Boolean(dl.snapshot.next_test), 'Snapshot specifies Next Test');
+
+  // Customer Outcome / Ngăn Proposition
+  assert(Boolean(dl.customer_outcome.why_this.statement), 'Customer Outcome: Why This present');
+  assert(Boolean(dl.customer_outcome.why_now.statement), 'Customer Outcome: Why Now present');
+  assert(Boolean(dl.customer_outcome.why_trust.statement), 'Customer Outcome: Why Trust present');
+  assert(Boolean(dl.customer_outcome.what_you_get.statement), 'Customer Outcome: What You Get present');
+  assert(Boolean(dl.customer_outcome.demand_mechanism.statement), 'Customer Outcome: Demand Mechanism present');
+  assert(Boolean(dl.customer_outcome.cta), 'Customer Outcome: CTA present');
+
+  // Preorder Proposition Triad (Reason to Care, Reason to Trust, Reason to Act Now)
+  const pre = dl.customer_outcome.preorder_proposition;
+  assert(Boolean(pre.reason_to_care.statement), 'Preorder: Reason to Care present');
+  assert(Boolean(pre.reason_to_trust.statement), 'Preorder: Reason to Trust present');
+  assert(Boolean(pre.reason_to_act_now.statement), 'Preorder: Reason to Act Now present');
+
+  // Epistemic Integrity in Customer Outcome
+  assert(['FACT', 'INTERPRETATION', 'HYPOTHESIS'].includes(dl.customer_outcome.why_this.classification), 'Why This has valid classification');
+  assert(['FACT', 'INTERPRETATION', 'HYPOTHESIS', 'UNKNOWN'].includes(dl.customer_outcome.why_now.classification), 'Why Now has valid classification');
+  assert(dl.customer_outcome.traceability.evidence_ids.length > 0, 'Customer Outcome traces to evidence IDs');
+  assert(dl.customer_outcome.traceability.source_urls.length > 0, 'Customer Outcome traces to source URLs');
+
+  // Producer Outcome / GMR Partnership Case
+  const prod = dl.producer_outcome;
+  assert(Boolean(prod.producer_problem.statement), 'Producer Outcome: Producer Problem present');
+  assert(Boolean(prod.gmr_value_creation.demand_creation.statement), 'GMR Value: Demand Creation present');
+  assert(Boolean(prod.gmr_value_creation.story_packaging.statement), 'GMR Value: Story Packaging present');
+  assert(Boolean(prod.gmr_value_creation.trust_packaging.statement), 'GMR Value: Trust Packaging present');
+  assert(Boolean(prod.gmr_value_creation.market_testing.statement), 'GMR Value: Market Testing present');
+  assert(Boolean(prod.gmr_value_creation.market_learning.statement), 'GMR Value: Market Learning present');
+
+  // Value Exchange (Two-sided)
+  assert(prod.value_exchange.producer_provides.length >= 4, 'Value Exchange: Producer Provides >= 4 items');
+  assert(prod.value_exchange.gmr_provides.length >= 4, 'Value Exchange: GMR Provides >= 4 items');
+
+  // Producer Ask
+  assert(Boolean(prod.producer_ask.batch_information), 'Producer Ask: Batch info present');
+  assert(Boolean(prod.producer_ask.price), 'Producer Ask: Price present');
+  assert(Boolean(prod.producer_ask.capacity), 'Producer Ask: Capacity present');
+  assert(Boolean(prod.producer_ask.evidence), 'Producer Ask: Evidence present');
+
+  // Partnership Hypothesis
+  assert(prod.partnership_hypothesis.classification === 'HYPOTHESIS', 'Partnership Hypothesis classification is strictly HYPOTHESIS');
+  assert(Boolean(prod.partnership_hypothesis.validation_kpi), 'Partnership Hypothesis specifies validation KPI');
+  assert(prod.traceability.evidence_ids.length > 0, 'Producer Outcome traces to evidence IDs');
+
+  console.log('  🟢 [A] OCA Golden UAT: ALL 11 SECTIONS & DECISION LAYER VERIFIED 100%\n');
 
   // --------------------------------------------------------------------------
   // B. GENERIC PRODUCER #002 (MÈO VẠC HÀ GIANG)
@@ -113,6 +169,13 @@ async function runHumanUatAcceptanceSuite() {
   assert(hgRun.opportunities.length <= 3, 'Generic opportunities capped at <= 3');
   assert(hgRun.intervention.intervention.includes('HTX Ong Bạc Hà Mèo Vạc'), 'Generic intervention dynamically customized');
 
+  // Generic Decision Layer Verification
+  assert(Boolean(hgRun.decision_layer), 'Producer #002 has generic Decision Layer');
+  assert(Boolean(hgRun.decision_layer.snapshot.what_we_see), 'Producer #002 Snapshot composed dynamically');
+  assert(Boolean(hgRun.decision_layer.customer_outcome.why_this.statement), 'Producer #002 Customer Outcome generated dynamically');
+  assert(Boolean(hgRun.decision_layer.producer_outcome.producer_problem.statement), 'Producer #002 Producer Problem generated dynamically');
+  assert(hgRun.decision_layer.producer_outcome.partnership_hypothesis.classification === 'HYPOTHESIS', 'Producer #002 Partnership Hypothesis classification is HYPOTHESIS');
+
   console.log('  🟢 [B] Generic Producer #002: VERIFIED 100% (No Hardcoding)\n');
 
   // --------------------------------------------------------------------------
@@ -120,7 +183,7 @@ async function runHumanUatAcceptanceSuite() {
   // --------------------------------------------------------------------------
   console.log('📝 [C] UAT Feedback Persistence & Foundation Isolation Check');
 
-  // Save CORRECT feedback
+  // Save CORRECT feedback on Evidence
   const fb1Res = await fetch(`${BASE_URL}/api/admin/growth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -135,37 +198,37 @@ async function runHumanUatAcceptanceSuite() {
   const fb1 = await fb1Res.json();
   assert(fb1.success === true && fb1.record.decision === 'CORRECT', 'CORRECT feedback saved successfully');
 
-  // Save REVIEW + note feedback
+  // Save REVIEW + note feedback on Decision Layer Customer Outcome
   const fb2Res = await fetch(`${BASE_URL}/api/admin/growth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       action: 'SAVE_UAT_FEEDBACK',
       producer_id: 'oca',
-      object_type: 'EVIDENCE',
-      object_id: 'EVD-OCA-005',
+      object_type: 'CUSTOMER_OUTCOME',
+      object_id: 'CUST-OUTCOME-MAIN',
       decision: 'REVIEW',
-      note: 'Cần yêu cầu bản scan PDF có dấu đỏ chứng chỉ hữu cơ',
+      note: 'Xem lại mức giá đặt trước so với dung tích chai rượu cacao',
     }),
   });
   const fb2 = await fb2Res.json();
-  assert(fb2.success === true && fb2.record.note.includes('bản scan PDF'), 'REVIEW feedback with note saved');
+  assert(fb2.success === true && fb2.record.note.includes('dung tích chai rượu'), 'REVIEW feedback on Customer Outcome saved');
 
-  // Save INCORRECT + note feedback
+  // Save INCORRECT + note feedback on Producer Outcome
   const fb3Res = await fetch(`${BASE_URL}/api/admin/growth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       action: 'SAVE_UAT_FEEDBACK',
       producer_id: 'oca',
-      object_type: 'HYPOTHESIS',
-      object_id: 'HYPOTHESIS-PRIMARY',
+      object_type: 'PRODUCER_OUTCOME',
+      object_id: 'PROD-OUTCOME-MAIN',
       decision: 'INCORRECT',
-      note: 'Thử nghiệm giả thuyết phân phối B2B trước khi gom mẻ B2C',
+      note: 'Producer cam kết năng lực 500kg chứ không phải 1000kg',
     }),
   });
   const fb3 = await fb3Res.json();
-  assert(fb3.success === true && fb3.record.decision === 'INCORRECT', 'INCORRECT feedback saved');
+  assert(fb3.success === true && fb3.record.decision === 'INCORRECT', 'INCORRECT feedback on Producer Outcome saved');
 
   // Check that feedback does not mutate evidence or truth
   const ocaCheckRes = await fetch(`${BASE_URL}/api/admin/growth?producer_id=oca`);
@@ -176,7 +239,7 @@ async function runHumanUatAcceptanceSuite() {
   console.log('  🟢 [C] UAT Feedback Persistence & Non-Mutation: 100% PASS\n');
 
   console.log('================================================================');
-  console.log('🎉 HUMAN UAT PRODUCER GROWTH v0.1 ACCEPTANCE CRITERIA: 100% PASS');
+  console.log('🎉 HUMAN UAT PRODUCER GROWTH v0.2 ACCEPTANCE CRITERIA: 100% PASS');
   console.log('================================================================\n');
 }
 

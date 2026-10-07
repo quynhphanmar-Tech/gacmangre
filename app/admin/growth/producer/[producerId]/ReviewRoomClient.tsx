@@ -193,6 +193,7 @@ export default function ReviewRoomClient({
     opportunities,
     intervention,
     content_request: contentReq,
+    decision_layer: decisionLayer,
   } = run;
 
   // Render UAT feedback button toolbar
@@ -258,6 +259,19 @@ export default function ReviewRoomClient({
     }
   };
 
+  const renderEpistemicBadge = (classification: string) => {
+    switch (classification) {
+      case 'FACT':
+        return <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-[#EAF5EC] text-[#1E4D2B] border border-[#A7D7AF]">FACT</span>;
+      case 'INTERPRETATION':
+        return <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-[#F0F4FA] text-[#1E3A8A] border border-[#BFDBFE]">INTERPRETATION</span>;
+      case 'HYPOTHESIS':
+        return <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-[#FEF7EC] text-[#8C5311] border border-[#E9C387]">HYPOTHESIS</span>;
+      default:
+        return <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-[#F3F4F6] text-[#6B7280] border border-[#D1D5DB]">UNKNOWN</span>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FBF9F5] text-[#2C2825] font-sans">
       {/* Toast Notification */}
@@ -295,6 +309,60 @@ export default function ReviewRoomClient({
             </Link>
           </div>
         </div>
+
+        {/* ================================================================== */}
+        {/* GROWTH SNAPSHOT (<= 60 seconds Synthesis)                          */}
+        {/* ================================================================== */}
+        {decisionLayer?.snapshot && (
+          <section className="bg-gradient-to-r from-[#2A2421] to-[#1C1917] text-[#F5F0E6] p-6 sm:p-8 rounded-2xl border border-[#423832] shadow-md space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#3E352E]">
+              <div className="flex items-center gap-2.5">
+                <span className="text-amber-400 text-sm">⚡</span>
+                <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#FAF7F2]">
+                  GROWTH SNAPSHOT (TỔNG QUAN TĂNG TRƯỞNG & ĐÁNH GIÁ TRONG 60 GIÂY)
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#3A3029] text-amber-200 border border-[#52443A]">
+                  Business Outcome Synthesis
+                </span>
+                {renderUatToolbar('GROWTH_SNAPSHOT', 'SNAPSHOT-MAIN')}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">01 · WHAT WE SEE</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.what_we_see}</p>
+              </div>
+
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">02 · WHY (LÝ DO NGHẼN)</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.why}</p>
+              </div>
+
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">03 · PRIMARY HYPOTHESIS</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.primary_hypothesis}</p>
+              </div>
+
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block">04 · CUSTOMER OUTCOME</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.customer_outcome}</p>
+              </div>
+
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block">05 · PRODUCER OUTCOME</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.producer_outcome}</p>
+              </div>
+
+              <div className="p-3.5 bg-[#221C19]/80 rounded-xl border border-[#3A302A] space-y-1.5">
+                <span className="text-[10px] font-mono text-sky-400 uppercase tracking-wider block">06 · NEXT TEST</span>
+                <p className="text-[#E6DED5] leading-relaxed">{decisionLayer.snapshot.next_test}</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ================================================================== */}
         {/* SECTION 01 — PRODUCER HEADER                                      */}
@@ -886,7 +954,341 @@ export default function ReviewRoomClient({
         </section>
 
         {/* ================================================================== */}
-        {/* SECTION 11 — TRACEABILITY EXPLORER                                 */}
+        {/* SECTION 11 — GROWTH OUTCOME (CUSTOMER & PRODUCER DUAL ENGINE)     */}
+        {/* ================================================================== */}
+        {decisionLayer && (
+          <section className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between pb-3 border-b border-[#E8E2D9] gap-3">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-[#1C1917] flex items-center gap-2">
+                  <span>11 · GROWTH OUTCOME (DECISION LAYER: DUAL OUTCOME)</span>
+                </h3>
+                <p className="text-xs text-[#7A6B5D]">
+                  Chuyển hóa chẩn đoán thành kết quả kinh doanh thực tế cho cả Khách hàng (Ngăn) và Nhà sản xuất (GMR Partnership)
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[#FAF8F5] text-[#5C544E] border border-[#DDD5CA]">
+                  DUAL-COLUMN ARCHITECTURE
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              {/* LEFT COLUMN: CUSTOMER OUTCOME / NGĂN PROPOSITION */}
+              <div className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E8E2D9] shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-[#F0EBE3]">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#A65F25] font-bold block">
+                      LEFT COLUMN · CONSUMER
+                    </span>
+                    <h4 className="font-serif text-base font-bold text-[#1C1917]">
+                      CUSTOMER OUTCOME / NGĂN PROPOSITION
+                    </h4>
+                  </div>
+                  {renderUatToolbar('CUSTOMER_OUTCOME', 'CUST-OUTCOME-MAIN')}
+                </div>
+
+                {/* 1. WHY THIS */}
+                <div className="space-y-1.5 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">WHY THIS (VÌ SAO CHỌN SẢN VẬT NÀY?)</span>
+                    {renderEpistemicBadge(decisionLayer.customer_outcome.why_this.classification)}
+                  </div>
+                  <p className="text-xs text-[#4A423C] leading-relaxed">
+                    {decisionLayer.customer_outcome.why_this.statement}
+                  </p>
+                </div>
+
+                {/* 2. WHY NOW */}
+                <div className="space-y-1.5 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">WHY NOW (TẠI SAO PHẢI LÀ BÂY GIỜ?)</span>
+                    {renderEpistemicBadge(decisionLayer.customer_outcome.why_now.classification)}
+                  </div>
+                  <p className="text-xs text-[#4A423C] leading-relaxed">
+                    {decisionLayer.customer_outcome.why_now.statement}
+                  </p>
+                  {decisionLayer.customer_outcome.why_now.gap && (
+                    <div className="text-[10px] text-[#A65F25] italic bg-[#FEF7EC] p-2 rounded border border-[#E9C387] mt-1">
+                      ⚠️ GAP: {decisionLayer.customer_outcome.why_now.gap}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. WHY TRUST */}
+                <div className="space-y-1.5 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">WHY TRUST (CƠ SỞ NIỀM TIN TRUNG THỰC)</span>
+                    {renderEpistemicBadge(decisionLayer.customer_outcome.why_trust.classification)}
+                  </div>
+                  <p className="text-xs text-[#4A423C] leading-relaxed">
+                    {decisionLayer.customer_outcome.why_trust.statement}
+                  </p>
+                  {decisionLayer.customer_outcome.why_trust.gap && (
+                    <div className="text-[10px] text-[#8C231A] italic bg-[#FBEAE8] p-2 rounded border border-[#E5A39B] mt-1">
+                      ⚠️ GAP: {decisionLayer.customer_outcome.why_trust.gap}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. WHAT YOU GET */}
+                <div className="space-y-1.5 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">WHAT YOU GET (TRẢI NGHIỆM THỰC NHẬN)</span>
+                    {renderEpistemicBadge(decisionLayer.customer_outcome.what_you_get.classification)}
+                  </div>
+                  <p className="text-xs text-[#4A423C] leading-relaxed">
+                    {decisionLayer.customer_outcome.what_you_get.statement}
+                  </p>
+                </div>
+
+                {/* 5. PREORDER / DEMAND MECHANISM FRAMEWORK */}
+                <div className="space-y-3 p-4 bg-[#F5EFE6] rounded-xl border border-[#DECDBB]">
+                  <div className="flex items-center justify-between pb-1 border-b border-[#E5D7C5]">
+                    <span className="text-[11px] font-bold text-[#1C1917] uppercase tracking-wide">
+                      WHY SHOULD CUSTOMER PREORDER? (3-PILLAR TRIAD)
+                    </span>
+                    <span className="text-[10px] font-mono text-[#A65F25]">TRIAD CHECK</span>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2C2825]">
+                        <span>• Reason to Care:</span>
+                        {renderEpistemicBadge(decisionLayer.customer_outcome.preorder_proposition.reason_to_care.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] pl-3 mt-0.5">
+                        {decisionLayer.customer_outcome.preorder_proposition.reason_to_care.statement}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2C2825]">
+                        <span>• Reason to Trust:</span>
+                        {renderEpistemicBadge(decisionLayer.customer_outcome.preorder_proposition.reason_to_trust.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] pl-3 mt-0.5">
+                        {decisionLayer.customer_outcome.preorder_proposition.reason_to_trust.statement}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2C2825]">
+                        <span>• Reason to Act Now:</span>
+                        {renderEpistemicBadge(decisionLayer.customer_outcome.preorder_proposition.reason_to_act_now.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] pl-3 mt-0.5">
+                        {decisionLayer.customer_outcome.preorder_proposition.reason_to_act_now.statement}
+                      </p>
+                    </div>
+
+                    {decisionLayer.customer_outcome.preorder_proposition.gap && (
+                      <div className="text-[10px] text-[#8C5311] italic bg-[#FEF7EC] p-2 rounded border border-[#E9C387] mt-1">
+                        ⚠️ GAP TRIAD: {decisionLayer.customer_outcome.preorder_proposition.gap}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* DEMAND MECHANISM & CTA */}
+                <div className="p-3.5 bg-white rounded-xl border border-[#E8E2D9] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">CƠ CHẾ NHU CẦU & CTA:</span>
+                    {renderEpistemicBadge(decisionLayer.customer_outcome.demand_mechanism.classification)}
+                  </div>
+                  <p className="text-xs text-[#5C544E]">{decisionLayer.customer_outcome.demand_mechanism.statement}</p>
+                  <div className="pt-2">
+                    <span className="inline-block px-4 py-2 bg-[#1C1917] text-[#FAF8F5] text-xs font-semibold rounded-lg tracking-wider">
+                      CTA: {decisionLayer.customer_outcome.cta}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customer Outcome Traceability */}
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE] font-mono text-[10px] space-y-1 text-[#5C544E]">
+                  <span className="font-semibold text-[#1C1917] block">Traceability (Customer Outcome):</span>
+                  <p>Proposition: {decisionLayer.customer_outcome.traceability.customer_proposition}</p>
+                  <p>Hypothesis: {decisionLayer.customer_outcome.traceability.growth_hypothesis}</p>
+                  <p>Evidence IDs: {decisionLayer.customer_outcome.traceability.evidence_ids.join(', ') || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: PRODUCER OUTCOME / GMR PARTNERSHIP CASE */}
+              <div className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E8E2D9] shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-[#F0EBE3]">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#1E5C2B] font-bold block">
+                      RIGHT COLUMN · PRODUCER
+                    </span>
+                    <h4 className="font-serif text-base font-bold text-[#1C1917]">
+                      PRODUCER OUTCOME / GMR PARTNERSHIP CASE
+                    </h4>
+                  </div>
+                  {renderUatToolbar('PRODUCER_OUTCOME', 'PROD-OUTCOME-MAIN')}
+                </div>
+
+                {/* 1. PRODUCER PROBLEM */}
+                <div className="space-y-1.5 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">PRODUCER PROBLEM (VẤN ĐỀ CỦA NHÀ SẢN XUẤT)</span>
+                    {renderEpistemicBadge(decisionLayer.producer_outcome.producer_problem.classification)}
+                  </div>
+                  <p className="text-xs text-[#8C231A] font-medium leading-relaxed">
+                    {decisionLayer.producer_outcome.producer_problem.statement}
+                  </p>
+                </div>
+
+                {/* 2. GMR VALUE CREATION (5 FRAMEWORKS) */}
+                <div className="space-y-2 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE]">
+                  <span className="text-[11px] font-semibold text-[#1C1917] block">
+                    GMR VALUE CREATION (5 TRỤ CỘT GIÁ TRỊ GMR MANG LẠI)
+                  </span>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-2 bg-white rounded border border-[#EDE7DE]">
+                      <div className="flex items-center justify-between">
+                        <strong className="text-[11px] text-[#1C1917]">1. Demand Creation (Tạo Nhu Cầu):</strong>
+                        {renderEpistemicBadge(decisionLayer.producer_outcome.gmr_value_creation.demand_creation.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] mt-0.5">
+                        {decisionLayer.producer_outcome.gmr_value_creation.demand_creation.statement}
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded border border-[#EDE7DE]">
+                      <div className="flex items-center justify-between">
+                        <strong className="text-[11px] text-[#1C1917]">2. Story Packaging (Đóng Gói Câu Chuyện):</strong>
+                        {renderEpistemicBadge(decisionLayer.producer_outcome.gmr_value_creation.story_packaging.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] mt-0.5">
+                        {decisionLayer.producer_outcome.gmr_value_creation.story_packaging.statement}
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded border border-[#EDE7DE]">
+                      <div className="flex items-center justify-between">
+                        <strong className="text-[11px] text-[#1C1917]">3. Trust Packaging (Đóng Gói Niềm Tin):</strong>
+                        {renderEpistemicBadge(decisionLayer.producer_outcome.gmr_value_creation.trust_packaging.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] mt-0.5">
+                        {decisionLayer.producer_outcome.gmr_value_creation.trust_packaging.statement}
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded border border-[#EDE7DE]">
+                      <div className="flex items-center justify-between">
+                        <strong className="text-[11px] text-[#1C1917]">4. Market Testing (Thử Nghiệm Thị Trường):</strong>
+                        {renderEpistemicBadge(decisionLayer.producer_outcome.gmr_value_creation.market_testing.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] mt-0.5">
+                        {decisionLayer.producer_outcome.gmr_value_creation.market_testing.statement}
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded border border-[#EDE7DE]">
+                      <div className="flex items-center justify-between">
+                        <strong className="text-[11px] text-[#1C1917]">5. Market Learning (Học Tập Thị Trường):</strong>
+                        {renderEpistemicBadge(decisionLayer.producer_outcome.gmr_value_creation.market_learning.classification)}
+                      </div>
+                      <p className="text-[11px] text-[#5C544E] mt-0.5">
+                        {decisionLayer.producer_outcome.gmr_value_creation.market_learning.statement}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. VALUE EXCHANGE (2 PHÍA) */}
+                <div className="space-y-3 p-4 bg-[#F2EFE9] rounded-xl border border-[#DDD5CA]">
+                  <span className="text-[11px] font-bold text-[#1C1917] uppercase tracking-wide block pb-1 border-b border-[#DDD5CA]">
+                    VALUE EXCHANGE (TRAO ĐỔI GIÁ TRỊ SONG HƯỚNG)
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {/* Producer Provides */}
+                    <div className="space-y-2 p-3 bg-white rounded-lg border border-[#EDE7DE]">
+                      <span className="text-[10px] font-bold text-[#A65F25] uppercase tracking-wider block">
+                        PRODUCER PROVIDES:
+                      </span>
+                      <ul className="space-y-1.5 text-[11px]">
+                        {decisionLayer.producer_outcome.value_exchange.producer_provides.map((item, idx) => (
+                          <li key={idx} className="flex items-start justify-between gap-1 text-[#4A423C]">
+                            <span>• {item.item}</span>
+                            {renderEpistemicBadge(item.classification)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* GMR Provides */}
+                    <div className="space-y-2 p-3 bg-white rounded-lg border border-[#EDE7DE]">
+                      <span className="text-[10px] font-bold text-[#1E5C2B] uppercase tracking-wider block">
+                        GMR PROVIDES:
+                      </span>
+                      <ul className="space-y-1.5 text-[11px]">
+                        {decisionLayer.producer_outcome.value_exchange.gmr_provides.map((item, idx) => (
+                          <li key={idx} className="flex items-start justify-between gap-1 text-[#4A423C]">
+                            <span>• {item.item}</span>
+                            {renderEpistemicBadge(item.classification)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. PRODUCER ASK */}
+                <div className="space-y-2 p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE] text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#1C1917]">
+                      PRODUCER ASK (YÊU CẦU ĐẦU VÀO ĐỂ GMR TRIỂN KHAI):
+                    </span>
+                    <span className="text-[10px] font-mono text-[#7A6B5D]">INPUT REQUIREMENTS</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-[#5C544E]">
+                    <p><strong className="text-[#1C1917]">• Mẻ sản xuất:</strong> {decisionLayer.producer_outcome.producer_ask.batch_information}</p>
+                    <p><strong className="text-[#1C1917]">• Thời điểm:</strong> {decisionLayer.producer_outcome.producer_ask.availability}</p>
+                    <p><strong className="text-[#1C1917]">• Chính sách giá:</strong> {decisionLayer.producer_outcome.producer_ask.price}</p>
+                    <p><strong className="text-[#1C1917]">• Năng lực (Capacity):</strong> {decisionLayer.producer_outcome.producer_ask.capacity}</p>
+                    <p><strong className="text-[#1C1917]">• Bằng chứng pháp lý:</strong> {decisionLayer.producer_outcome.producer_ask.evidence}</p>
+                    <p><strong className="text-[#1C1917]">• Cam kết giao hàng:</strong> {decisionLayer.producer_outcome.producer_ask.fulfillment_commitment}</p>
+                  </div>
+                  {decisionLayer.producer_outcome.producer_ask.gap && (
+                    <div className="text-[10px] text-[#8C231A] italic bg-[#FBEAE8] p-2 rounded border border-[#E5A39B] mt-1">
+                      ⚠️ GAP: {decisionLayer.producer_outcome.producer_ask.gap}
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. PARTNERSHIP HYPOTHESIS & KPI */}
+                <div className="p-4 bg-[#F2F7F4] rounded-xl border border-[#BBDAC2] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-[#1E5C2B] uppercase tracking-wide">
+                      PARTNERSHIP HYPOTHESIS (GIẢ THUYẾT HỢP TÁC CHIẾN LƯỢC)
+                    </span>
+                    {renderEpistemicBadge(decisionLayer.producer_outcome.partnership_hypothesis.classification)}
+                  </div>
+                  <p className="font-serif text-[#14381C] leading-relaxed italic">
+                    “{decisionLayer.producer_outcome.partnership_hypothesis.statement}”
+                  </p>
+                  <div className="pt-1 text-[11px] text-[#2D5A35]">
+                    <strong>Thước đo thành công (KPI):</strong> {decisionLayer.producer_outcome.partnership_hypothesis.validation_kpi}
+                  </div>
+                </div>
+
+                {/* Producer Outcome Traceability */}
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EDE7DE] font-mono text-[10px] space-y-1 text-[#5C544E]">
+                  <span className="font-semibold text-[#1C1917] block">Traceability (Producer Outcome):</span>
+                  <p>Case: {decisionLayer.producer_outcome.traceability.partnership_case}</p>
+                  <p>Diagnosis Dimensions: {decisionLayer.producer_outcome.traceability.growth_diagnosis_keys.join(', ')}</p>
+                  <p>Evidence IDs: {decisionLayer.producer_outcome.traceability.evidence_ids.join(', ') || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ================================================================== */}
+        {/* SECTION 12 — TRACEABILITY EXPLORER                                 */}
         {/* ================================================================== */}
         <section className="p-4 bg-[#FAF8F5] rounded-xl border border-[#E0D8CE] text-xs space-y-3">
           <div className="flex items-center justify-between">

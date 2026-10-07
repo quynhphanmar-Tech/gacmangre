@@ -30,6 +30,12 @@ import {
   ProducerGrowthRunOutput,
   SkillIsolationRequest,
   UatFeedbackRecord,
+  GrowthDecisionLayer,
+  GrowthSnapshot,
+  CustomerOutcomeProposition,
+  ProducerOutcomePartnershipCase,
+  EpistemicStatement,
+  ValueExchangeItem,
 } from '@/types';
 import { experienceGovernanceService } from '@/services/experience-governance-service';
 
@@ -283,6 +289,17 @@ export class ProducerGrowthService {
     const ocaOpps = this.buildOpportunityMap('oca', ocaHypothesis, ocaDiagnosis);
     const ocaIntervention = this.designIntervention('oca', ocaOpps[0], ocaIntel);
     const ocaContentRequest = this.createContentRequest('oca', ocaIntervention, ocaIntel, ocaEvidence);
+    const ocaDecisionLayer = this.buildDecisionLayer(
+      'oca',
+      ocaIntel,
+      ocaDiagnosis,
+      ocaVtp,
+      ocaHypothesis,
+      ocaOpps,
+      ocaIntervention,
+      ocaEvidence,
+      ocaScan
+    );
 
     const ocaRun: ProducerGrowthRunOutput = {
       run_id: 'RUN-GRW-OCA-GOLDEN-001',
@@ -300,6 +317,7 @@ export class ProducerGrowthService {
       priority_opportunity: ocaOpps[0],
       intervention: ocaIntervention,
       content_request: ocaContentRequest,
+      decision_layer: ocaDecisionLayer,
       unknowns: ocaIntel.unknowns,
       next_action: 'Mở Human UAT Review Room; tiếp nhận đánh giá từ Quỳnh.',
     };
@@ -446,6 +464,17 @@ export class ProducerGrowthService {
     const hgOpps = this.buildOpportunityMap('meo-vac', hgHypothesis, hgDiagnosis);
     const hgIntervention = this.designIntervention('meo-vac', hgOpps[0], hgIntel);
     const hgContentRequest = this.createContentRequest('meo-vac', hgIntervention, hgIntel, hgEvidence);
+    const hgDecisionLayer = this.buildDecisionLayer(
+      'meo-vac',
+      hgIntel,
+      hgDiagnosis,
+      hgVtp,
+      hgHypothesis,
+      hgOpps,
+      hgIntervention,
+      hgEvidence,
+      hgScan
+    );
 
     const hgRun: ProducerGrowthRunOutput = {
       run_id: 'RUN-GRW-MEOVAC-002',
@@ -463,6 +492,7 @@ export class ProducerGrowthService {
       priority_opportunity: hgOpps[0],
       intervention: hgIntervention,
       content_request: hgContentRequest,
+      decision_layer: hgDecisionLayer,
       unknowns: hgIntel.unknowns,
       next_action: 'Mở Human UAT Review Room cho Producer #002.',
     };
@@ -1008,6 +1038,206 @@ export class ProducerGrowthService {
   }
 
   // ----------------------------------------------------------------------------
+  // 11. GROWTH DECISION LAYER (v0.2 Business Outcome: Customer & Producer)
+  // ----------------------------------------------------------------------------
+  public buildDecisionLayer(
+    producer_id: string,
+    intel: ProducerIntelligenceData,
+    diagnosis: Record<GrowthDimensionKey, GrowthDimensionEvaluation>,
+    vtp: ValueTrustPriceAnalysis,
+    hypothesis: PrimaryGrowthHypothesis,
+    opportunities: GrowthOpportunity[],
+    intervention: GrowthInterventionPlan,
+    evidenceList: MinedEvidenceItem[],
+    coverage: SourceScanResult
+  ): GrowthDecisionLayer {
+    const verifiedEvidence = evidenceList.filter((e) => e.truth_status === 'VERIFIED');
+    const claimEvidence = evidenceList.filter((e) => e.truth_status === 'PRODUCER_CLAIM');
+    const missingEvidence = evidenceList.filter((e) => e.truth_status === 'MISSING_EVIDENCE');
+
+    const primaryEvIds = verifiedEvidence.map((e) => e.id).slice(0, 4);
+    const primarySourceUrls = verifiedEvidence.map((e) => e.source_url).slice(0, 4);
+
+    // Compose Growth Snapshot (<=60s synthesis composed from existing run)
+    const snapshot: GrowthSnapshot = {
+      what_we_see: `${intel.identity.name} sở hữu năng lực sản xuất mộc tại ${intel.place?.geography || 'địa phương'}, có sản phẩm chế biến sâu rõ nét (${intel.product?.products?.join(', ') || 'sản phẩm nông sản'}).`,
+      why: `${diagnosis.DEMAND?.gap || 'Điểm nghẽn kênh & cơ chế gom mẻ'}; ${vtp.overall_interpretation}`,
+      primary_hypothesis: hypothesis.statement,
+      customer_outcome: `Khách hàng nhận sản phẩm tươi mới tận xưởng thông qua cơ chế gom mẻ MOQ, minh bạch nguồn gốc và tối ưu chi phí vận chuyển.`,
+      producer_outcome: `Chuyển dịch từ bán lẻ đơn chiếc sang sản xuất theo mẻ cam kết, giải phóng áp lực tồn kho và định hình giá trị thủ công bền vững cùng Gạc Măng Rê.`,
+      next_test: `Mở 1 Ngăn thử nghiệm trên Gạc Măng Rê với cam kết MOQ tối thiểu 20-30 suất trong 10-14 ngày.`,
+    };
+
+    // Compose Customer Outcome / Ngăn Proposition
+    // Seasonality check
+    const seasonalityEvidence = verifiedEvidence.find((e) =>
+      e.claim.toLowerCase().includes('mùa') || e.claim.toLowerCase().includes('tháng') || e.claim.toLowerCase().includes('vụ')
+    );
+    const whyNowClassification = seasonalityEvidence ? 'FACT' : (intel.place?.seasonality ? 'INTERPRETATION' : 'HYPOTHESIS');
+    const whyNowStatement = seasonalityEvidence
+      ? `Thời điểm vàng đón mẻ sản vật mới: ${seasonalityEvidence.claim}`
+      : (intel.place?.seasonality
+        ? `Sản phẩm theo mùa vụ tự nhiên: ${intel.place.seasonality}`
+        : 'Sản xuất mẻ mộc tươi mới đón đầu nhu cầu tiêu dùng theo mùa (chờ xác nhận lịch thu hoạch)');
+
+    const customer_outcome: CustomerOutcomeProposition = {
+      why_this: {
+        statement: `${intel.brand_story?.positioning || 'Sản vật mộc nguyên bản'}, gìn giữ tay nghề người làm (${intel.people?.founders?.join(', ') || intel.identity.name}) và quy trình ${intel.craft?.distinctive_practice || intel.craft?.process || 'thủ công tự nhiên'}.`,
+        classification: verifiedEvidence.length > 0 ? 'FACT' : 'INTERPRETATION',
+        evidence_ids: primaryEvIds,
+        source_urls: primarySourceUrls,
+      },
+      why_now: {
+        statement: whyNowStatement,
+        classification: whyNowClassification,
+        evidence_ids: seasonalityEvidence ? [seasonalityEvidence.id] : undefined,
+        source_urls: seasonalityEvidence ? [seasonalityEvidence.source_url] : undefined,
+        gap: !seasonalityEvidence ? 'Chưa có chứng thư/lịch thu hoạch chính xác từng tháng theo mùa vụ' : undefined,
+      },
+      why_trust: {
+        statement: `Minh chứng thực địa kiểm định rõ ràng: ${verifiedEvidence.map((e) => e.claim).slice(0, 2).join('; ') || intel.identity.name}.${claimEvidence.length > 0 ? ` (Lưu ý: Một số chứng nhận quốc tế đang ở trạng thái PRODUCER_CLAIM, chờ bản scan kiểm định)` : ''}`,
+        classification: 'FACT',
+        evidence_ids: primaryEvIds,
+        source_urls: primarySourceUrls,
+        gap: claimEvidence.length > 0 ? 'Cần bổ sung file scan có dấu đỏ của các chứng chỉ kiểm định' : undefined,
+      },
+      what_you_get: {
+        statement: `${intel.product?.products?.[0] || 'Sản vật tuyển chọn'} (${intel.product?.price_points?.[0]?.product || 'Quy cách chuẩn'}), đóng gói nguyên bản tận xưởng, không qua xử lý công nghiệp làm mất dưỡng chất.`,
+        classification: 'FACT',
+        evidence_ids: primaryEvIds.slice(0, 2),
+        source_urls: primarySourceUrls.slice(0, 2),
+      },
+      preorder_proposition: {
+        reason_to_care: {
+          statement: `Sản phẩm nông sản mộc chế biến sâu tử tế, tôn trọng tự nhiên và tạo sinh kế bền vững cho người làm vùng ${intel.place?.geography || 'bản địa'}.`,
+          classification: 'FACT',
+          evidence_ids: primaryEvIds,
+          source_urls: primarySourceUrls,
+        },
+        reason_to_trust: {
+          statement: `Toàn bộ hồ sơ nguồn gốc, giấy phép sản xuất và quy trình chế biến được phân loại minh bạch theo Truth Gate của GMR.`,
+          classification: 'FACT',
+          evidence_ids: primaryEvIds,
+          source_urls: primarySourceUrls,
+        },
+        reason_to_act_now: {
+          statement: whyNowStatement,
+          classification: whyNowClassification,
+          evidence_ids: seasonalityEvidence ? [seasonalityEvidence.id] : undefined,
+          source_urls: seasonalityEvidence ? [seasonalityEvidence.source_url] : undefined,
+          gap: !seasonalityEvidence ? 'Thiếu minh chứng mùa vụ chính xác từng tháng' : undefined,
+        },
+        gap: !seasonalityEvidence ? 'Cần bổ sung lịch hạ mẻ / vụ thu hoạch cụ thể để củng cố Reason to Act Now' : undefined,
+      },
+      demand_mechanism: {
+        statement: intervention.demand_mechanism,
+        classification: 'HYPOTHESIS',
+        evidence_ids: diagnosis.DEMAND?.evidence,
+      },
+      cta: intervention.cta,
+      traceability: {
+        customer_proposition: `Ngăn Gom Mẻ Theo Mùa - ${intel.identity.name}`,
+        growth_hypothesis: hypothesis.statement,
+        interpretations: hypothesis.based_on.interpretations,
+        facts: hypothesis.based_on.facts,
+        evidence_ids: primaryEvIds,
+        source_urls: primarySourceUrls,
+      },
+    };
+
+    // Compose Producer Outcome / GMR Partnership Case
+    const producer_outcome: ProducerOutcomePartnershipCase = {
+      producer_problem: {
+        statement: `${diagnosis.DEMAND?.gap || 'Phân phối phân tán, thiếu cơ chế gom đơn tập trung'} và ${diagnosis.CHANNEL?.gap || 'kênh bán lẻ manh mún tạo áp lực chi phí giao vận'}.`,
+        classification: 'INTERPRETATION',
+        evidence_ids: diagnosis.DEMAND?.evidence,
+      },
+      gmr_value_creation: {
+        demand_creation: {
+          statement: `Tổ chức chiến dịch gom mẻ cộng đồng (MOQ Group-Buy), tập hợp nhu cầu trước khi đóng mẻ để giảm thiểu rủi ro tồn kho.`,
+          classification: 'HYPOTHESIS',
+          notes: 'Mô hình gom mẻ đặt cọc trước đã chứng minh trên hệ thống Ngăn',
+        },
+        story_packaging: {
+          statement: `Đóng gói câu chuyện Đất - Người - Vị - Chuyện chuẩn Brand OS (Mộc, Tĩnh, Chiều sâu), loại bỏ lối nói quá đà để bảo vệ uy tín người làm.`,
+          classification: 'FACT',
+          notes: 'Năng lực cốt lõi của GMR Foundation Content & Story Gate',
+        },
+        trust_packaging: {
+          statement: `Hệ thống hóa toàn bộ minh chứng thành hồ sơ thực địa minh bạch theo Truth Gate (phân định rõ Verified và Producer Claim).`,
+          classification: 'FACT',
+          notes: 'Cơ chế Truth Gate và Evidence Map của GMR',
+        },
+        market_testing: {
+          statement: `Kiểm chứng độ nhạy giá và sức hút sản phẩm với tệp khách hàng trân quý nông sản chất lượng cao trước khi mở rộng quy mô.`,
+          classification: 'HYPOTHESIS',
+          notes: 'Được đo lường qua tỷ lệ đạt MOQ trong 10-14 ngày',
+        },
+        market_learning: {
+          statement: `Phản hồi trực tiếp từ người tiêu dùng sau khi trải nghiệm sản phẩm để hoàn thiện bao bì, định giá và hương vị mẻ sau.`,
+          classification: 'HYPOTHESIS',
+          notes: 'Hệ thống Market Learning vòng lặp khép kín',
+        },
+      },
+      value_exchange: {
+        producer_provides: [
+          { item: `Sản phẩm chủ lực đạt chuẩn chất lượng (${intel.product?.products?.join(', ') || 'Sản phẩm'})`, classification: 'FACT', evidence_ids: primaryEvIds },
+          { item: `Chính sách giá sỉ/gom mẻ minh bạch cho cộng đồng`, classification: intel.product?.price_points ? 'FACT' : 'UNKNOWN' },
+          { item: `Bản scan giấy chứng nhận, giấy phép kinh doanh, kiểm nghiệm vi sinh`, classification: verifiedEvidence.length > 0 ? 'FACT' : 'UNKNOWN', evidence_ids: primaryEvIds },
+          { item: `Năng lực sản xuất tối thiểu và cam kết thời gian đóng mẻ`, classification: intel.commercial?.capacity ? 'FACT' : 'UNKNOWN' },
+          { item: `Cam kết đóng gói và gửi hàng đúng hẹn theo tiêu chuẩn Ngăn`, classification: 'HYPOTHESIS' },
+          { item: `Tư liệu hình ảnh, video thực địa và đón tiếp đoàn tác nghiệp GMR`, classification: 'FACT' },
+        ],
+        gmr_provides: [
+          { item: `Đóng gói câu chuyện thương hiệu & ký sự thực địa chuẩn Brand OS`, classification: 'FACT' },
+          { item: `Cơ chế kích hoạt nhu cầu cộng đồng và gom đơn đạt MOQ`, classification: 'HYPOTHESIS' },
+          { item: `Bộ đề xuất giá trị người tiêu dùng (Customer Proposition) sắc bén`, classification: 'FACT' },
+          { item: `Hạ tầng tiếp nhận đặt cọc và theo dõi tiến độ mẻ qua Website & Zalo OA`, classification: 'FACT' },
+          { item: `Báo cáo insight khách hàng và phân tích sau mở Ngăn`, classification: 'HYPOTHESIS' },
+          { item: `Vòng lặp học tập thị trường (Market Learning) hoàn thiện sản phẩm`, classification: 'HYPOTHESIS' },
+        ],
+      },
+      producer_ask: {
+        batch_information: `Thông tin số lượng và ngày sản xuất dự kiến của mẻ sản phẩm chủ lực.`,
+        availability: intel.commercial?.availability || `Sẵn sàng theo vụ mùa thu hoạch thực tế.`,
+        price: `Mức giá ưu đãi cho mẻ gom cộng đồng thấp hơn giá bán lẻ đơn chiếc để tạo động lực đặt trước.`,
+        capacity: intel.commercial?.capacity || `Cam kết sản lượng tối thiểu đáp ứng từ 30 đến 100 suất gom.`,
+        evidence: `Bản scan chứng nhận chất lượng có dấu đỏ và kết quả kiểm nghiệm lô gần nhất.`,
+        assets: `Ảnh xưởng sản xuất, bàn tay người làm và video 15s ghi lại công đoạn chế biến đặc trưng.`,
+        fulfillment_commitment: `Cam kết gửi hàng đúng ngày dự kiến sau khi đóng mẻ gom thành công.`,
+        gap: claimEvidence.length > 0 || missingEvidence.length > 0
+          ? `Còn thiếu bản scan chứng chỉ kiểm định chính thức để hoàn tất hồ sơ pháp lý`
+          : undefined,
+      },
+      success_kpi: {
+        statement: intervention.kpi,
+        classification: 'HYPOTHESIS',
+      },
+      partnership_hypothesis: {
+        statement: `Chúng tôi tin rằng Gạc Măng Rê và ${intel.identity.name} có thể tạo ra giá trị cộng hưởng bền vững bằng cách tổ chức chiến dịch gom mẻ theo mô hình Ngăn, dựa trên minh chứng thực địa về ${intel.craft?.distinctive_practice || intel.craft?.process || 'chất lượng thủ công mộc'}. Giả thuyết này sẽ được kiểm chứng khi chiến dịch đạt 100% ngưỡng MOQ công bố.`,
+        classification: 'HYPOTHESIS',
+        value: `Tạo dòng tiền đặt trước, giảm chi phí vận chuyển đơn lẻ và đưa sản vật trực tiếp đến khách hàng yêu thích sản phẩm tử tế.`,
+        intervention: intervention.intervention,
+        evidence: verifiedEvidence.map((e) => e.claim).slice(0, 3),
+        validation_kpi: intervention.kpi,
+      },
+      traceability: {
+        partnership_case: `Quan hệ hợp tác chiến lược Ngăn Gom Mẻ: GMR x ${intel.identity.name}`,
+        growth_hypothesis: hypothesis.statement,
+        growth_diagnosis_keys: ['DEMAND', 'CHANNEL', 'PRODUCT', 'COMMERCE'],
+        evidence_ids: primaryEvIds,
+        source_urls: primarySourceUrls,
+      },
+    };
+
+    return {
+      snapshot,
+      customer_outcome,
+      producer_outcome,
+    };
+  }
+
+  // ----------------------------------------------------------------------------
   // COMPLETE END-TO-END RUNNER (Generic Across Any Producer)
   // ----------------------------------------------------------------------------
   public async runGrowthAnalysis(input: ScanInputConfig): Promise<ProducerGrowthRunOutput> {
@@ -1087,6 +1317,19 @@ export class ProducerGrowthService {
       created_at: timestamp,
     };
 
+    // Step 11: Growth Decision Layer (Customer & Producer Business Outcomes)
+    const decision_layer = this.buildDecisionLayer(
+      input.producer_id,
+      producer_intelligence,
+      growth_diagnosis,
+      value_trust_price,
+      primary_growth_hypothesis,
+      opportunities,
+      intervention,
+      evidence_map,
+      source_coverage
+    );
+
     const finalOutput: ProducerGrowthRunOutput = {
       run_id,
       producer_id: input.producer_id,
@@ -1104,6 +1347,7 @@ export class ProducerGrowthService {
       intervention,
       content_request,
       market_learning_plan,
+      decision_layer,
       unknowns: producer_intelligence.unknowns,
       next_action: 'Chuyển giao ContentRequestSpec sang Content Skill; chuẩn bị tài sản thực địa cho Ngăn.',
     };

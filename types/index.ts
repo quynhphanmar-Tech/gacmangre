@@ -1018,7 +1018,7 @@ export interface ProducerIntelligenceData {
   unknowns: string[];
 }
 
-export type EpistemicClassification = 'FACT' | 'INTERPRETATION' | 'HYPOTHESIS';
+export type EpistemicClassification = 'FACT' | 'INTERPRETATION' | 'HYPOTHESIS' | 'UNKNOWN';
 
 export type GrowthDimensionKey =
   | 'PRODUCT'
@@ -1129,6 +1129,101 @@ export interface MarketLearningRecord {
   created_at: string;
 }
 
+export interface GrowthSnapshot {
+  what_we_see: string;
+  why: string;
+  primary_hypothesis: string;
+  customer_outcome: string;
+  producer_outcome: string;
+  next_test: string;
+}
+
+export interface EpistemicStatement {
+  statement: string;
+  classification: EpistemicClassification;
+  evidence_ids?: string[];
+  source_urls?: string[];
+  gap?: string;
+  notes?: string;
+}
+
+export interface CustomerOutcomeProposition {
+  why_this: EpistemicStatement;
+  why_now: EpistemicStatement;
+  why_trust: EpistemicStatement;
+  what_you_get: EpistemicStatement;
+  preorder_proposition: {
+    reason_to_care: EpistemicStatement;
+    reason_to_trust: EpistemicStatement;
+    reason_to_act_now: EpistemicStatement;
+    gap?: string;
+  };
+  demand_mechanism: EpistemicStatement;
+  cta: string;
+  traceability: {
+    customer_proposition: string;
+    growth_hypothesis: string;
+    interpretations: string[];
+    facts: string[];
+    evidence_ids: string[];
+    source_urls: string[];
+  };
+}
+
+export interface ValueExchangeItem {
+  item: string;
+  classification: EpistemicClassification;
+  evidence_ids?: string[];
+  notes?: string;
+}
+
+export interface ProducerOutcomePartnershipCase {
+  producer_problem: EpistemicStatement;
+  gmr_value_creation: {
+    demand_creation: EpistemicStatement;
+    story_packaging: EpistemicStatement;
+    trust_packaging: EpistemicStatement;
+    market_testing: EpistemicStatement;
+    market_learning: EpistemicStatement;
+  };
+  value_exchange: {
+    producer_provides: ValueExchangeItem[];
+    gmr_provides: ValueExchangeItem[];
+  };
+  producer_ask: {
+    batch_information: string;
+    availability: string;
+    price: string;
+    capacity: string;
+    evidence: string;
+    assets: string;
+    fulfillment_commitment: string;
+    gap?: string;
+  };
+  success_kpi: EpistemicStatement;
+  partnership_hypothesis: {
+    statement: string;
+    classification: 'HYPOTHESIS';
+    value: string;
+    intervention: string;
+    evidence: string[];
+    validation_kpi: string;
+  };
+  traceability: {
+    partnership_case: string;
+    growth_hypothesis: string;
+    growth_diagnosis_keys: GrowthDimensionKey[];
+    evidence_ids: string[];
+    source_urls: string[];
+  };
+}
+
+export interface GrowthDecisionLayer {
+  snapshot: GrowthSnapshot;
+  customer_outcome: CustomerOutcomeProposition;
+  producer_outcome: ProducerOutcomePartnershipCase;
+}
+
 export interface ProducerGrowthRunOutput {
   run_id: string;
   producer_id: string;
@@ -1147,6 +1242,7 @@ export interface ProducerGrowthRunOutput {
   intervention?: GrowthInterventionPlan;
   content_request?: ContentRequestSpec;
   market_learning_plan?: MarketLearningRecord;
+  decision_layer?: GrowthDecisionLayer;
   unknowns: string[];
   next_action: string;
 }
@@ -1163,7 +1259,16 @@ export type UatDecision = 'CORRECT' | 'REVIEW' | 'INCORRECT';
 export interface UatFeedbackRecord {
   feedback_id: string;
   producer_id: string;
-  object_type: 'EVIDENCE' | 'DIAGNOSIS' | 'HYPOTHESIS' | 'OPPORTUNITY' | 'INTERVENTION' | 'CONTENT_REQUEST';
+  object_type:
+    | 'EVIDENCE'
+    | 'DIAGNOSIS'
+    | 'HYPOTHESIS'
+    | 'OPPORTUNITY'
+    | 'INTERVENTION'
+    | 'CONTENT_REQUEST'
+    | 'CUSTOMER_OUTCOME'
+    | 'PRODUCER_OUTCOME'
+    | 'GROWTH_SNAPSHOT';
   object_id: string;
   decision: UatDecision;
   note?: string;
