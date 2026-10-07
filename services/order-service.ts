@@ -312,6 +312,23 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
 
         processEvent(moqEvt.id).catch((e) => console.warn('Non-blocking MOQ notification error:', e));
       }
+
+      // Phase 4: Learning Trace (Customer Order Action -> Observation -> Market Learning)
+      // Epistemic rule: Records observation only, does NOT mutate verified facts or brand rules
+      try {
+        const { producerGrowthService } = await import('@/services/producer-growth-service');
+        const producerKey = targetNgan.slug.includes('oca') ? 'oca' : 'meo-vac';
+        producerGrowthService.recordInternalMarketLearning({
+          producer_id: producerKey,
+          target_pillar: 'CUSTOMER_OUTCOME',
+          observation: `Khách hàng đặt thành công ${quantity} phần trên Ngăn ${targetNgan.number} (${newOrder.order_code}). Tổng nhu cầu hiện tại: ${newTotal}/${targetNgan.moq}.`,
+          interpretation: `Đề xuất mở Ngăn và định vị giá trị "${targetNgan.title}" kích hoạt thành công hành vi đặt trước từ người dùng.`,
+          hypothesis: `Tỷ lệ hoàn tất chuyển đổi qua State-derived CTA giữ mức ổn định khi tiến trình mở Ngăn được hiển thị minh bạch.`,
+          next_test: `Kiểm tra tỷ lệ xác nhận mẻ khi đạt ngưỡng MOQ đối với mô hình vận chuyển tương ứng.`,
+        });
+      } catch (learningErr) {
+        console.warn('Market learning recording logged error (order unaffected):', learningErr);
+      }
     } catch (evtErr) {
       console.warn('Background event emission logged error (order unaffected):', evtErr);
     }

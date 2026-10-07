@@ -5,8 +5,19 @@ import { Ngan } from '@/types';
 export async function getNganBySlug(slug: string): Promise<Ngan | null> {
   // Check mock store first for fast zero-failure fallback
   const normalized = slug.trim().toLowerCase();
+
+  // Canonical alias resolution for vertical slice MVP
+  const slugAliases: Record<string, string> = {
+    'cacao-oca': 'cacao-len-men-thu-cong-oca',
+    'oca': 'cacao-len-men-thu-cong-oca',
+    'mat-ong-bac-ha-meo-vac': 'mat-ong-bac-ha-ha-giang',
+    'meo-vac': 'mat-ong-bac-ha-ha-giang',
+  };
+  const targetSlug = slugAliases[normalized] || normalized;
+
   const mockFound = mockNgans.find(
     (n) =>
+      n.slug.toLowerCase() === targetSlug ||
       n.slug.toLowerCase() === normalized ||
       n.number.toLowerCase() === normalized ||
       n.number.replace('#', '').toLowerCase() === normalized ||

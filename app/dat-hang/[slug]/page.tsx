@@ -1,14 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import { mockNgans, mockNgan001 } from '@/lib/data/mock-data';
 
 export default function OrderFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+
+  // Resolve slug dynamically
+  const slug = (typeof params?.slug === 'string' ? params.slug : '') || 'mat-ong-bac-ha-ha-giang';
+  const normalized = slug.trim().toLowerCase();
+
+  // Match corresponding Ngăn
+  const slugAliases: Record<string, string> = {
+    'cacao-oca': 'cacao-len-men-thu-cong-oca',
+    'oca': 'cacao-len-men-thu-cong-oca',
+    'mat-ong-bac-ha-meo-vac': 'mat-ong-bac-ha-ha-giang',
+    'meo-vac': 'mat-ong-bac-ha-ha-giang',
+  };
+  const targetSlug = slugAliases[normalized] || normalized;
+  const currentNgan = mockNgans.find(
+    (n) => n.slug.toLowerCase() === targetSlug || n.slug.toLowerCase() === normalized || n.id === slug
+  ) || mockNgan001;
 
   // Form Fields
   const [quantity, setQuantity] = useState(1);
@@ -33,20 +51,20 @@ export default function OrderFormPage() {
     setIdempotencyKey(key);
 
     trackEvent('order_form_view', {
-      ngan_number: '#001',
+      ngan_number: currentNgan.number,
       utm_source: searchParams.get('utm_source') || 'direct',
     });
-  }, [searchParams]);
+  }, [searchParams, currentNgan.number]);
 
   // Track user start typing
   const handleFirstInteraction = () => {
     if (!hasTrackedStart.current) {
       hasTrackedStart.current = true;
-      trackEvent('order_form_start', { ngan_number: '#001' });
+      trackEvent('order_form_start', { ngan_number: currentNgan.number });
     }
   };
 
-  const unitPrice = 280000;
+  const unitPrice = currentNgan.price;
   const totalAmount = unitPrice * quantity;
 
   const formattedUnitPrice = new Intl.NumberFormat('vi-VN', {
@@ -83,7 +101,7 @@ export default function OrderFormPage() {
     }
 
     setIsSubmitting(true);
-    trackEvent('order_submit', { quantity, ngan_number: '#001' });
+    trackEvent('order_submit', { quantity, ngan_number: currentNgan.number });
 
     try {
       const res = await fetch('/api/orders', {
@@ -96,7 +114,7 @@ export default function OrderFormPage() {
           address: address.trim(),
           province,
           quantity,
-          ngan_id: 'c3333333-3333-3333-3333-333333333333',
+          ngan_id: currentNgan.id,
           note: note.trim() || undefined,
           source: searchParams.get('source') || 'DIRECT_WEB',
           utm_source: searchParams.get('utm_source') || undefined,
@@ -121,7 +139,7 @@ export default function OrderFormPage() {
       trackEvent('order_success', {
         order_code: data.order_code,
         quantity,
-        ngan_number: '#001',
+        ngan_number: currentNgan.number,
       });
 
       // Route directly to Order Confirmation
@@ -137,11 +155,11 @@ export default function OrderFormPage() {
     <div className="py-10 md:py-20 px-5 sm:px-8 max-w-xl mx-auto">
       <div className="mb-6">
         <Link
-          href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+          href={`/ngan/${slug}`}
           className="inline-flex items-center gap-2 text-xs uppercase tracking-pantryst text-[#665E58] hover:text-[#141211] transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Quay lại Ngăn #001</span>
+          <span>Quay lại Ngăn {currentNgan.number}</span>
         </Link>
       </div>
 
@@ -149,13 +167,13 @@ export default function OrderFormPage() {
         {/* Header with Collective Language */}
         <div className="space-y-2 pb-6 border-b border-[#E7DFD3]">
           <span className="px-3 py-1 rounded-full bg-[#EFE8DC] text-[11px] font-mono font-bold text-[#A65F25]">
-            MỞ NGĂN #001
+            MỞ NGĂN {currentNgan.number}
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#141211]">
-            Mật ong bạc hà hoa dại Hà Giang
+            {currentNgan.title}
           </h1>
           <p className="text-xs text-[#665E58] font-sans">
-            Mẻ thu hái thủ công từ Mèo Vạc · Mùa đông 2026
+            Từ {currentNgan.product?.origin} · Mùa vụ 2026
           </p>
         </div>
 
@@ -307,7 +325,7 @@ export default function OrderFormPage() {
               rows={2}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Gửi gắm tới anh Giàng A Páo hoặc ghi chú nhận hàng thuận tiện..."
+              placeholder={`Gửi gắm tới ${currentNgan.product?.producer?.name || 'người làm'} hoặc ghi chú nhận hàng...`}
               className="w-full px-4 py-3 rounded-xl border border-[#E7DFD3] bg-[#FAF8F5] text-sm text-[#141211] focus:outline-none focus:border-[#A65F25] transition"
             />
           </div>
@@ -319,7 +337,7 @@ export default function OrderFormPage() {
               <span>Chưa thu tiền ngay lúc này</span>
             </div>
             <p className="leading-relaxed text-[#665E58]">
-              Bạn đang cùng mọi người tạo tín hiệu nhu cầu thật để mở Ngăn. Chúng tôi chỉ thông báo thanh toán và xuất mẻ khi Ngăn gom đủ 100/100 phần và người làm bắt đầu đóng mẻ tươi.
+              Bạn đang cùng mọi người tạo tín hiệu nhu cầu thật để mở Ngăn. Chúng tôi chỉ thông báo thanh toán và xuất mẻ khi Ngăn gom đủ {currentNgan.moq}/{currentNgan.moq} phần và người làm bắt đầu đóng mẻ tươi.
             </p>
           </div>
 
