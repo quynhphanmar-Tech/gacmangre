@@ -114,6 +114,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: 'Regression rule appended' });
     }
 
+    if (action === 'TEST_SKILL_ISOLATION') {
+      const isolationResult = experienceGovernanceService.enforceSkillIsolation(body.request);
+      return NextResponse.json({ success: true, result: isolationResult });
+    }
+
+    if (action === 'VALIDATE_ORPHAN') {
+      const orphanResult = experienceGovernanceService.validateNoOrphanObject(body.object_type, body.object);
+      return NextResponse.json({ success: true, result: orphanResult });
+    }
+
     // Default action: Evaluate custom input payload
     const scorecard = await experienceGovernanceService.evaluate(body.input);
     return NextResponse.json({ success: true, scorecard });
@@ -122,3 +132,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+

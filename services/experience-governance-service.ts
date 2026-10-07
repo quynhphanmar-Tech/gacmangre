@@ -985,6 +985,95 @@ export class ExperienceGovernanceService {
 
 
   // --------------------------------------------------------------------------
+  // SKILL ISOLATION & BOUNDARY ENFORCEMENT
+  // Principle: Skills (Content Skill, Producer Growth Skill, etc.) can generate
+  // outputs, but MUST NOT mutate Brand Truth, Evidence, Producer Claims, Story Truth,
+  // Commerce Rules, or Ngăn State.
+  // --------------------------------------------------------------------------
+  public enforceSkillIsolation(request: {
+    skill_name: string;
+    action: string;
+    target_layer: 'BRAND_TRUTH' | 'EVIDENCE' | 'PRODUCER_CLAIM' | 'STORY_TRUTH' | 'COMMERCE_RULE' | 'NGAN_STATE' | 'CONTENT_OUTPUT';
+    attempted_mutation?: string;
+  }): { allowed: boolean; violation_code?: string; message: string } {
+    const protectedLayers = [
+      'BRAND_TRUTH',
+      'EVIDENCE',
+      'PRODUCER_CLAIM',
+      'STORY_TRUTH',
+      'COMMERCE_RULE',
+      'NGAN_STATE',
+    ];
+
+    if (protectedLayers.includes(request.target_layer)) {
+      return {
+        allowed: false,
+        violation_code: 'SKILL_ISOLATION_VIOLATION',
+        message: `Skill "${request.skill_name}" cannot mutate protected layer "${request.target_layer}". Skills may only generate CONTENT_OUTPUT or propose drafts.`,
+      };
+    }
+
+    return {
+      allowed: true,
+      message: `Skill operation on ${request.target_layer} allowed within isolation boundary.`,
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // NO ORPHAN OBJECT INVARIANT
+  // Principle: Every business object must trace cleanly to its parent / evidence.
+  // Content -> Story -> Ngan -> Product -> Producer -> Source -> Evidence.
+  // Order -> Ngan -> Product -> Producer.
+  // Shipment -> Order.
+  // Feedback -> Order / Ngan.
+  // --------------------------------------------------------------------------
+  public validateNoOrphanObject(objectType: 'CONTENT' | 'ORDER' | 'SHIPMENT' | 'FEEDBACK' | 'LEARNING', obj: Record<string, any>): {
+    is_orphan: boolean;
+    missing_links: string[];
+    canonical_valid: boolean;
+  } {
+    const missing: string[] = [];
+
+    switch (objectType) {
+      case 'CONTENT':
+        if (!obj.story_id) missing.push('story_id');
+        if (!obj.ngan_id) missing.push('ngan_id');
+        if (!obj.product_id) missing.push('product_id');
+        if (!obj.producer_id) missing.push('producer_id');
+        if (!obj.source_id) missing.push('source_id');
+        if (!obj.evidence_id && (!obj.evidence_ids || obj.evidence_ids.length === 0)) missing.push('evidence_ids');
+        break;
+
+      case 'ORDER':
+        if (!obj.ngan_id) missing.push('ngan_id');
+        if (!obj.product_id) missing.push('product_id');
+        if (!obj.producer_id) missing.push('producer_id');
+        break;
+
+      case 'SHIPMENT':
+        if (!obj.order_id) missing.push('order_id');
+        break;
+
+      case 'FEEDBACK':
+        if (!obj.order_id && !obj.ngan_id) missing.push('order_id_or_ngan_id');
+        break;
+
+      case 'LEARNING':
+        if (!obj.ngan_id && !obj.content_id && !obj.product_id && !obj.producer_id) {
+          missing.push('parent_entity_id');
+        }
+        break;
+    }
+
+    const isOrphan = missing.length > 0;
+    return {
+      is_orphan: isOrphan,
+      missing_links: missing,
+      canonical_valid: !isOrphan,
+    };
+  }
+
+  // --------------------------------------------------------------------------
   // FAILURE REGISTRY & REGRESSION SUITE METHODS
   // --------------------------------------------------------------------------
   public getFailures(): FailureRecord[] {
@@ -1005,3 +1094,4 @@ export class ExperienceGovernanceService {
 }
 
 export const experienceGovernanceService = ExperienceGovernanceService.getInstance();
+

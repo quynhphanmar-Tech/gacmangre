@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getNganBySlug } from '@/services/ngan-service';
+import { getNganBySlug, getNganCtaSpec } from '@/services/ngan-service';
 import ProgressBar from '@/components/ProgressBar';
 import { MapPin, ArrowRight, ShieldCheck, Check, Sparkles, Camera } from 'lucide-react';
 
@@ -17,10 +17,13 @@ export default async function NganDetailPage({ params }: NganPageProps) {
     notFound();
   }
 
+  const ctaSpec = getNganCtaSpec(ngan);
+
   const formattedPrice = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
   }).format(ngan.price);
+
 
   const heroAsset = ngan.media_assets?.[0];
   const handsAsset = ngan.media_assets?.[1];
@@ -139,24 +142,29 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               <ProgressBar current={ngan.current_quantity} moq={ngan.moq} />
             </div>
 
-            {/* Action CTA & Reassurance */}
+            {/* Action CTA & Reassurance — State-derived UI */}
             <div className="space-y-3 pt-2">
-              <Link
-                href={`/dat-hang/${ngan.slug}`}
-                className="w-full py-4 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-all duration-300 shadow-md hover:shadow-lg text-center flex items-center justify-center gap-2"
-              >
-                <span>MỞ NGĂN</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <div className="flex items-center justify-center gap-4 text-[11px] text-[#665E58] font-sans">
-                <span>✓ Thanh toán khi đủ ngăn</span>
-                <span>•</span>
-                <span>✓ Cập nhật qua Zalo OA</span>
+              {ctaSpec.isOrderable ? (
+                <Link
+                  href={`/dat-hang/${ngan.slug}`}
+                  className="w-full py-4 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-all duration-300 shadow-md hover:shadow-lg text-center flex items-center justify-center gap-2"
+                >
+                  <span>{ctaSpec.ctaText}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <div className="w-full py-4 px-6 rounded-full bg-[#EFE8DC] text-[#423B36] text-xs uppercase tracking-pantryst font-bold text-center border border-[#E7DFD3] flex items-center justify-center gap-2">
+                  <span>{ctaSpec.ctaText}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-center gap-4 text-[11px] text-[#665E58] font-sans text-center">
+                <span>{ctaSpec.explanationText || '✓ Cập nhật qua Zalo OA'}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* 7-PART EDITORIAL EXPERIENCE FLOW (Brief v1.1 Section 06) */}
       <div className="max-w-4xl mx-auto px-5 sm:px-8 space-y-20 border-t border-[#E7DFD3] pt-16">
@@ -282,18 +290,24 @@ export default async function NganDetailPage({ params }: NganPageProps) {
           </p>
 
           <div className="pt-2">
-            <Link
-              href={`/dat-hang/${ngan.slug}`}
-              className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#A65F25] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#864918] transition-all duration-300 shadow-lg"
-            >
-              <span>MỞ NGĂN NGAY</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            {ctaSpec.isOrderable ? (
+              <Link
+                href={`/dat-hang/${ngan.slug}`}
+                className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#A65F25] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#864918] transition-all duration-300 shadow-lg"
+              >
+                <span>{ctaSpec.ctaText}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#EFE8DC] text-[#423B36] text-xs uppercase tracking-pantryst font-bold border border-[#E7DFD3]">
+                <span>{ctaSpec.ctaText}</span>
+              </div>
+            )}
           </div>
         </section>
       </div>
 
-      {/* MOBILE STICKY BOTTOM BAR (Brief v1.1 Section 07 P0 Requirement) */}
+      {/* MOBILE STICKY BOTTOM BAR (State-derived UI) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md border-t border-[#E7DFD3] p-4 shadow-2xl">
         <div className="max-w-md mx-auto flex items-center justify-between gap-4">
           <div className="space-y-0.5">
@@ -304,14 +318,21 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               {formattedPrice}
             </span>
           </div>
-          <Link
-            href={`/dat-hang/${ngan.slug}`}
-            className="flex-1 py-3.5 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-colors text-center shadow"
-          >
-            MỞ NGĂN
-          </Link>
+          {ctaSpec.isOrderable ? (
+            <Link
+              href={`/dat-hang/${ngan.slug}`}
+              className="flex-1 py-3.5 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-colors text-center shadow"
+            >
+              {ctaSpec.ctaText}
+            </Link>
+          ) : (
+            <div className="flex-1 py-3.5 px-6 rounded-full bg-[#EFE8DC] text-[#423B36] text-xs uppercase tracking-pantryst font-bold text-center border border-[#E7DFD3]">
+              {ctaSpec.ctaText}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
