@@ -903,5 +903,261 @@ export interface RegressionRule {
   pass_count: number;
 }
 
+// ==============================================================================
+// PRODUCER GROWTH SKILL v0.1 — CORE TYPED SCHEMAS
+// Strict Hierarchy & Isolation: Intelligence / Diagnosis / Hypothesis / Opportunity / Intervention / Learning
+// ==============================================================================
+
+export type SourceSurfaceCategory =
+  | 'IDENTITY'
+  | 'PRODUCT'
+  | 'ORIGIN'
+  | 'PROCESS'
+  | 'PEOPLE'
+  | 'CERTIFICATION'
+  | 'EXPORT'
+  | 'MARKET'
+  | 'PARTNER_B2B'
+  | 'STORY'
+  | 'COMMERCIAL'
+  | 'SOCIAL'
+  | 'MEDIA';
+
+export type CoverageStatus = 'HIGH' | 'MEDIUM' | 'LOW' | 'INSUFFICIENT';
+
+export interface SourceScanResult {
+  source_id: string;
+  requested_url: string;
+  discovered_urls: string[];
+  accessible_urls: string[];
+  inaccessible_urls: string[];
+  not_found_urls: string[];
+  sitemap_count: number;
+  page_count: number;
+  source_groups: Record<SourceSurfaceCategory, string[]>;
+  coverage_status: CoverageStatus;
+  scan_completeness: {
+    score: number; // 0 - 100
+    details: string;
+  };
+  missing_surfaces: SourceSurfaceCategory[];
+}
+
+export type EvidenceMinerTruthStatus =
+  | 'VERIFIED'
+  | 'PRODUCER_CLAIM'
+  | 'EDITORIAL_INTERPRETATION'
+  | 'UNKNOWN'
+  | 'MISSING_EVIDENCE';
+
+export interface MinedEvidenceItem {
+  id: string;
+  claim: string;
+  source_id: string;
+  source_url: string;
+  source_type: 'OFFICIAL_WEBSITE' | 'SOCIAL' | 'GOVERNMENT_REGISTRY' | 'THIRD_PARTY_AUDIT';
+  truth_status: EvidenceMinerTruthStatus;
+  evidence_type: string;
+  confidence: number; // 0.0 - 1.0
+  notes?: string;
+}
+
+export interface ProducerIntelligenceData {
+  producer_id: string;
+  source_id: string;
+  identity: {
+    name: string;
+    location: string;
+    established?: number | string;
+    role?: string;
+    tax_id?: string;
+    legal_name?: string;
+  };
+  product: {
+    products: string[];
+    categories: string[];
+    price_points: { product: string; price?: number; unit?: string }[];
+  };
+  place: {
+    geography: string;
+    local_context: string;
+    seasonality?: string;
+  };
+  people: {
+    founders: string[];
+    makers: string[];
+    farmers: string[];
+  };
+  craft: {
+    process: string;
+    distinctive_practice: string;
+  };
+  proof: {
+    certifications: string[];
+    traceability?: string;
+    export: string[];
+    third_party_proof?: string;
+  };
+  market: {
+    current_channels: string[];
+    target_market?: string;
+    b2b: string[];
+    b2c: string[];
+  };
+  brand_story: {
+    positioning: string;
+    narrative: string;
+    differentiation: string;
+  };
+  commercial: {
+    observed_price_range?: string;
+    availability?: string;
+    capacity?: string;
+    logistics?: string;
+  };
+  unknowns: string[];
+}
+
+export type EpistemicClassification = 'FACT' | 'INTERPRETATION' | 'HYPOTHESIS';
+
+export type GrowthDimensionKey =
+  | 'PRODUCT'
+  | 'BRAND'
+  | 'STORY'
+  | 'PROOF'
+  | 'CONTENT'
+  | 'CHANNEL'
+  | 'DEMAND'
+  | 'COMMERCE';
+
+export interface GrowthDimensionEvaluation {
+  current_state: string;
+  evidence: string[];
+  gap: string;
+  interpretation: string;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  unknowns: string[];
+}
+
+export interface ValueTrustPriceAnalysis {
+  price: {
+    observed_price_points: { product: string; price?: number; unit?: string }[];
+    perceived_value: string;
+    friction: string;
+  };
+  emotional_value: {
+    strength: 'LOW' | 'MEDIUM' | 'HIGH';
+    evidence: string[];
+  };
+  trust: {
+    strength: 'LOW' | 'MEDIUM' | 'HIGH';
+    evidence: string[];
+    gaps: string[];
+  };
+  overall_interpretation: string;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
+export interface PrimaryGrowthHypothesis {
+  statement: string;
+  classification: 'HYPOTHESIS';
+  based_on: {
+    facts: string[];
+    interpretations: string[];
+  };
+  evidence: string[];
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  unknowns: string[];
+  validation_needed: string;
+}
+
+export interface GrowthOpportunity {
+  opportunity_id: string;
+  statement: string;
+  based_on: string;
+  expected_value: 'LOW' | 'MEDIUM' | 'HIGH';
+  effort: 'LOW' | 'MEDIUM' | 'HIGH';
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  evidence: string[];
+  score?: number;
+}
+
+export interface GrowthInterventionPlan {
+  id: string;
+  opportunity_id: string;
+  problem: string;
+  hypothesis: string;
+  intervention: string;
+  assets: string[];
+  channels: string[];
+  cta: string;
+  demand_mechanism: string;
+  kpi: string;
+  duration: string;
+}
+
+export interface ContentRequestSpec {
+  request_id: string;
+  story_id?: string;
+  producer_id: string;
+  objective: string;
+  growth_problem: string;
+  target_behavior: string;
+  key_evidence: string[];
+  required_assets: string[];
+  channel: string;
+  cta: string;
+  created_at: string;
+}
+
+export interface MarketLearningRecord {
+  id: string;
+  intervention_id: string;
+  observed: {
+    attention?: string;
+    trust?: string;
+    intent?: string;
+    demand?: string;
+    conversion?: string;
+    fulfillment?: string;
+    repeat?: string;
+  };
+  outcome: string;
+  hypothesis_status: 'SUPPORTED' | 'PARTIALLY_SUPPORTED' | 'REJECTED' | 'INCONCLUSIVE';
+  learning: string;
+  next_action: string;
+  created_at: string;
+}
+
+export interface ProducerGrowthRunOutput {
+  run_id: string;
+  producer_id: string;
+  source_id: string;
+  timestamp: string;
+  can_diagnose: boolean;
+  rejection_reason?: string;
+  source_coverage: SourceScanResult;
+  evidence_map: MinedEvidenceItem[];
+  producer_intelligence?: ProducerIntelligenceData;
+  growth_diagnosis?: Record<GrowthDimensionKey, GrowthDimensionEvaluation>;
+  value_trust_price?: ValueTrustPriceAnalysis;
+  primary_growth_hypothesis?: PrimaryGrowthHypothesis;
+  opportunities?: GrowthOpportunity[];
+  priority_opportunity?: GrowthOpportunity;
+  intervention?: GrowthInterventionPlan;
+  content_request?: ContentRequestSpec;
+  market_learning_plan?: MarketLearningRecord;
+  unknowns: string[];
+  next_action: string;
+}
+
+export interface SkillIsolationRequest {
+  skill_name: string;
+  action: string;
+  target_layer: 'BRAND_TRUTH' | 'EVIDENCE' | 'PRODUCER_CLAIM' | 'STORY_TRUTH' | 'COMMERCE_RULE' | 'NGAN_STATE' | 'CONTENT_OUTPUT';
+  attempted_mutation?: string;
+}
+
+
 
 

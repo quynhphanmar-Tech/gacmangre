@@ -1,0 +1,93 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { producerGrowthService } from '@/services/producer-growth-service';
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const run_id = searchParams.get('run_id');
+    const producer_id = searchParams.get('producer_id');
+
+    if (run_id) {
+      const run = producerGrowthService.getRun(run_id);
+      if (!run) {
+        return NextResponse.json({ success: false, error: 'Run not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, run });
+    }
+
+    if (producer_id) {
+      const assets = producerGrowthService.getWorkbenchAssets(producer_id);
+      return NextResponse.json({ success: true, assets });
+    }
+
+    return NextResponse.json({
+      success: true,
+      service: 'ProducerGrowthService v0.1',
+      status: 'READY',
+      features: [
+        'Source Surface Coverage Mapping',
+        'Strict Truth Evidence Mining',
+        'Producer Intelligence 11D',
+        '8-Dimension Growth Diagnosis',
+        'Value-Trust-Price Triad',
+        'Primary Growth Hypothesis Engine',
+        'Max 3 Opportunity Ranking',
+        'Intervention Plan Generator',
+        'Content Request Adapter',
+        'Market Learning Scaffold',
+      ],
+    });
+  } catch (error: any) {
+    console.error('Growth API GET Error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const action = body.action || 'RUN_ANALYSIS';
+
+    if (action === 'RUN_ANALYSIS') {
+      const output = await producerGrowthService.runGrowthAnalysis(body.input);
+      return NextResponse.json({ success: true, output });
+    }
+
+    if (action === 'SAVE_WORKBENCH_ASSET') {
+      const asset = producerGrowthService.saveWorkbenchAsset(body.producer_id, body.asset);
+      return NextResponse.json({ success: true, asset });
+    }
+
+    if (action === 'RECORD_MARKET_LEARNING') {
+      const record = producerGrowthService.recordMarketLearning(
+        body.intervention_id,
+        body.observed,
+        body.outcome,
+        body.hypothesis_status,
+        body.learning,
+        body.next_action
+      );
+      return NextResponse.json({ success: true, record });
+    }
+
+    if (action === 'TEST_ISOLATION_MUTATION') {
+      // Intentionally triggers skill isolation guard
+      try {
+        producerGrowthService.guardIsolation(body.request);
+        return NextResponse.json({ success: true, allowed: true });
+      } catch (err: any) {
+        return NextResponse.json({
+          success: false,
+          allowed: false,
+          error: err.message,
+          code: err.code || 'SKILL_ISOLATION_VIOLATION',
+        }, { status: 403 });
+      }
+    }
+
+    return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
+  } catch (error: any) {
+    console.error('Growth API POST Error:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
