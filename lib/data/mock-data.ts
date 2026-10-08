@@ -295,6 +295,104 @@ export const mockNgans: Ngan[] = [
       'https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1511381939415-e44015466834?q=80&w=800&auto=format&fit=crop',
     ],
+    media_assets: [
+      {
+        id: 'asset-oca-hero',
+        product_id: 'prod-oca-cacao',
+        producer_id: 'prod-oca',
+        url: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=1200&auto=format&fit=crop',
+        alt_text: 'Hạt cacao lên men thủ công OCA',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Hạt cacao Trinitario lên men thùng gỗ tại xưởng Bình Giã, Châu Đức',
+        credit: 'Ảnh: Tư liệu OCA Cacao',
+        slot: 'hero',
+      },
+      {
+        id: 'asset-oca-hands',
+        product_id: 'prod-oca-cacao',
+        producer_id: 'prod-oca',
+        url: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Đôi tay thợ đảo hạt cacao trong thùng ủ men',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Đảo hạt định kỳ 2 ngày một lần để kiểm soát nhiệt độ khối ủ',
+        credit: 'Ảnh: Thực địa Châu Đức',
+        slot: 'hands',
+      },
+      {
+        id: 'asset-oca-place',
+        product_id: 'prod-oca-cacao',
+        producer_id: 'prod-oca',
+        url: 'https://images.unsplash.com/photo-1511381939415-e44015466834?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Vùng trồng cacao huyện Châu Đức, Bà Rịa - Vũng Tàu',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Vườn cacao xen canh dưới tán điều tại Châu Đức',
+        credit: 'Ảnh: OCA Cacao',
+        slot: 'place',
+      },
+      {
+        id: 'asset-oca-texture',
+        product_id: 'prod-oca-cacao',
+        producer_id: 'prod-oca',
+        url: 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Bột cacao nguyên chất giàu bơ cacao tự nhiên',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Bột cacao thô mộc không kiềm hóa, hàm lượng bơ tự nhiên >18%',
+        credit: 'Ảnh: OCA Lab',
+        slot: 'texture',
+      },
+    ],
+    story_object: {
+      id: 'story-obj-oca',
+      headline: 'Hạt cacao Châu Đức lên men thùng gỗ 6 ngày, giữ trọn bơ cacao tự nhiên',
+      excerpt: 'Một vùng đất đang học cách làm cacao theo cách riêng của mình. Hạt lên men thùng gỗ giữ trọn hương vị thô mộc tự nhiên.',
+      why_this: 'Khác với cacao công nghiệp bị tách kiềm hóa và vắt kiệt bơ cacao để bán riêng, bột cacao của OCA giữ nguyên tỷ lệ bơ cacao tự nhiên trên 18%. Hạt được lên men thủ công trong thùng gỗ mộc từ 5–6 ngày trước khi phơi nắng giàn, mang vị chua thanh hoa quả nhiệt đới đặc trưng từ vùng trồng Châu Đức, Bà Rịa - Vũng Tàu.',
+      why_preorder_care: 'Sản phẩm giữ nguyên bơ cacao tươi, mang lại hương vị sâu lắng và giá trị dinh dưỡng cao nhất.',
+      why_preorder_trust: 'Minh bạch nguồn gốc từng lô hạt, xuất xứ Châu Đức (Bà Rịa - Vũng Tàu) rõ ràng, pháp nhân xưởng sản xuất có đăng ký chính ngạch.',
+      why_preorder_act_now: 'Xưởng chỉ rang và nghiền khi gom đủ 30 hộp để đảm bảo mẻ bột tươi mới nhất đến tay người mở.',
+      making_process: [
+        'Thu hái chọn lọc: Chỉ hạ quả khi vỏ chín vàng đều, bóc hạt ngay trong ngày để giữ men tươi.',
+        'Lên men thùng gỗ mộc: Ủ 5–6 ngày với lớp lá chuối phủ kín, đảo hạt định kỳ để giải phóng nốt hương hoa quả.',
+        'Phơi giàn nắng tự nhiên: Làm khô chậm dưới nắng giàn cao ráo, tuyệt đối không sấy khói cưỡng bức làm hỏng bơ.',
+      ],
+      selection_dat: 'Thổ nhưỡng đất đỏ màu mỡ cùng khí hậu nắng ấm giúp cây cacao tích lũy hàm lượng bơ tự nhiên cao và hương vị đậm đà.',
+      selection_nguoi: 'Đội ngũ OCA đồng hành cùng nông hộ tỉ mỉ từng mẻ: kiểm tra độ chua lên men từng ngày trước khi phơi giàn đón nắng.',
+      selection_vi: 'Vị đắng êm dịu, thoang thoảng vị chua thanh nhẹ tự nhiên của trái cây nhiệt đới lên men, hậu vị béo bùi lắng sâu.',
+      selection_chuyen: 'Hành trình kiên trì tìm lối đi riêng cho hạt cacao Việt Nam, khẳng định phẩm chất hạt mộc không cần pha hương liệu.',
+      curation_reason: 'Chúng tôi mở Ngăn này để cùng bạn chứng minh rằng: nông sản chế biến sâu của người Việt Nam hoàn toàn có thể tự đứng vững bằng phẩm chất nguyên bản mà không cần ẩn mình sau các nhãn hàng gia công công nghiệp.',
+      evidence_refs: [
+        {
+          id: 'evd-oca-fact-01',
+          claim: 'Pháp nhân & Hồ sơ xuất khẩu Nhật Bản',
+          source_id: 'src-oca-corp',
+          source_url: 'https://ocacacao.com/about-us/',
+          source_type: 'OFFICIAL_DOCUMENT',
+          truth_status: 'VERIFIED',
+          notes: 'Công ty TNHH OCA Việt Nhật (ĐKKD 3502512543), có chứng từ xuất khẩu chính ngạch sang thị trường Nhật Bản và nhà xưởng đạt chuẩn an toàn VSTP.',
+        },
+        {
+          id: 'evd-oca-claim-02',
+          claim: 'Tuyên bố: Vùng trồng canh tác tự nhiên / Hữu cơ',
+          source_id: 'src-oca-claim',
+          source_url: 'https://ocacacao.com/meet-our-farmers/',
+          source_type: 'PRODUCER_DECLARATION',
+          truth_status: 'PRODUCER_CLAIM',
+          notes: 'Nhà vườn tuyên bố không dùng thuốc bảo vệ thực vật hóa học trong vụ thu hoạch. (Ghi chú minh bạch: Gạc Măng Rê chưa nhận bản scan chứng nhận Organic quốc tế độc lập, dữ liệu được ghi nhận theo cam kết của người làm).',
+        },
+      ],
+      asset_refs: [],
+    },
+    demand_state: {
+      current_quantity: 18,
+      moq: 30,
+      progress_percent: 60,
+      qualified_demand: true,
+      state: 'OPEN',
+      cta: 'CÙNG MỞ MẺ NGAY',
+    },
     selection_dat: 'Thổ nhưỡng đất đỏ màu mỡ cùng khí hậu nắng ấm giúp cây cacao tích lũy hàm lượng bơ tự nhiên cao và hương vị đậm đà.',
     selection_nguoi: 'Đội ngũ OCA đồng hành cùng nông hộ tỉ mỉ từng mẻ: kiểm tra độ chua lên men từng ngày trước khi phơi giàn đón nắng.',
     selection_vi: 'Vị đắng êm dịu, thoang thoảng vị chua thanh nhẹ tự nhiên của trái cây nhiệt đới lên men, hậu vị béo bùi lắng sâu.',
@@ -349,6 +447,104 @@ export const mockNgans: Ngan[] = [
       'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=800&auto=format&fit=crop',
     ],
+    media_assets: [
+      {
+        id: 'asset-meovac-hero',
+        product_id: 'prod-honey-ha-giang',
+        producer_id: 'prod-meo-vac',
+        url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=1200&auto=format&fit=crop',
+        alt_text: 'Mật ong hoa bạc hà Mèo Vạc Hà Giang',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Mật ong hoa bạc hà khai thác tại vách đá tai mèo Mèo Vạc',
+        credit: 'Ảnh: Thực địa Gạc Măng Rê',
+        slot: 'hero',
+      },
+      {
+        id: 'asset-meovac-hands',
+        product_id: 'prod-honey-ha-giang',
+        producer_id: 'prod-meo-vac',
+        url: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Đôi tay anh Giàng A Páo hạ tầng ong vít nắp già',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Hạ cầu ong vít nắp già bằng dao gạt thủ công',
+        credit: 'Ảnh: Thực địa Mèo Vạc',
+        slot: 'hands',
+      },
+      {
+        id: 'asset-meovac-place',
+        product_id: 'prod-honey-ha-giang',
+        producer_id: 'prod-meo-vac',
+        url: 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Cao nguyên đá vôi Mèo Vạc Hà Giang mùa sương muối',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Thung lũng đá tai mèo trên 1.200m nơi hoa bạc hà mọc hoang dã',
+        credit: 'Ảnh: Thực địa Hà Giang',
+        slot: 'place',
+      },
+      {
+        id: 'asset-meovac-texture',
+        product_id: 'prod-honey-ha-giang',
+        producer_id: 'prod-meo-vac',
+        url: 'https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=600&auto=format&fit=crop',
+        alt_text: 'Mật ong sánh đặc màu vàng chanh ánh xanh',
+        asset_type: 'DOCUMENTARY',
+        is_verified: true,
+        caption: 'Giọt mật sóng sánh tự nhiên, thủy phần dưới 19%',
+        credit: 'Ảnh: Thực địa Hà Giang',
+        slot: 'texture',
+      },
+    ],
+    story_object: {
+      id: 'story-obj-meovac',
+      headline: 'Mật ong hoa bạc hà khai thác triền đá vôi Đồng Văn - Mèo Vạc (>1.200m)',
+      excerpt: 'Được chắt chiu từ triền đá tai mèo lạnh buốt mùa đông. Màu vàng chanh ánh xanh, vị ngọt thanh mát sâu cổ họng.',
+      why_this: 'Hoa bạc hà dại chỉ nở trên các hốc đá tai mèo lạnh buốt vào mùa đông (tháng 10 đến tháng 12). Đàn ong bản địa kiếm mật trong điều kiện khắc nghiệt, tạo nên dòng mật sánh đặc màu vàng chanh ánh xanh với hậu vị the mát sâu cổ họng.',
+      why_preorder_care: 'Mật hoa bạc hà thật khai thác tự nhiên chỉ có một mùa duy nhất trong năm, không thể tái sản xuất công nghiệp.',
+      why_preorder_trust: 'Kiểm nghiệm thủy phần trực tiếp tại bản, sổ tay nhật ký khai thác và quay mật của anh Giàng A Páo.',
+      why_preorder_act_now: 'Sản lượng vụ đông 2026 giới hạn theo số cầu ong thực tế của bản. Không thu hoạch thêm sau khi hết mùa hoa.',
+      making_process: [
+        'Hạ tầng ong: Chỉ gạt nhẹ lớp sáp vít nắp khi mật đã chín già đặc tự nhiên.',
+        'Không qua đun nóng: Giữ nguyên vẹn các enzyme kháng khuẩn và hạt phấn hoa bạc hà tím ngát.',
+        'Lọc vải thưa: Chỉ loại bỏ sáp vụn, giữ trọn vẹn màu vàng chanh ánh xanh nguyên bản.',
+      ],
+      selection_dat: 'Thung lũng đá vôi cao nguyên Đồng Văn trên 1.200m nơi loài hoa bạc hà mọc hoang dã chỉ nở trong sương muối mùa đông.',
+      selection_nguoi: 'Anh Giàng A Páo — người Mông giữ nguyên quy tắc quay mật chín vít nắp già, không hạ nhiệt độ cô đặc nhân tạo.',
+      selection_vi: 'Ngọt thanh dịu dàng, the mát tựa gió núi, màu vàng chanh ánh xanh đặc trưng.',
+      selection_chuyen: 'Chuyến xe vượt đèo Mèo Vạc để mang hương vị chân thực về căn bếp người biết trân trọng sự tử tế.',
+      curation_reason: 'Chúng tôi mở Ngăn này để bảo vệ giá trị thật của người nuôi ong trên vách đá tai mèo Mèo Vạc, nơi giọt mật hoa dại xứng đáng được trả đúng giá trị thay vì bị ép giá bởi thị trường hương liệu công nghiệp.',
+      evidence_refs: [
+        {
+          id: 'evd-meovac-fact-01',
+          claim: 'Tọa độ thực địa & Nhật ký khai thác',
+          source_id: 'src-meovac-field',
+          source_url: 'https://gacmangre.com/thuc-dia/meo-vac-2026',
+          source_type: 'FIELD_AUDIT',
+          truth_status: 'VERIFIED',
+          notes: 'Ghi nhận thực địa có GPS tại Mèo Vạc (23°09\'N, 105°24\'E), sổ theo dõi thời gian quay mật và kiểm nghiệm thủy phần tự nhiên dưới 19%.',
+        },
+        {
+          id: 'evd-meovac-claim-02',
+          claim: 'Tuyên bố: 100% nguyên chất hoang dã',
+          source_id: 'src-meovac-claim',
+          source_url: 'https://gacmangre.com/thuc-dia/meo-vac-2026',
+          source_type: 'PRODUCER_DECLARATION',
+          truth_status: 'PRODUCER_CLAIM',
+          notes: 'Người nuôi ong cam kết không can thiệp đun nhiệt hạ thủy phần. Được kiểm chứng bằng mẫu nếm trực tiếp tại chỗ nhưng chưa có lab test phổ quang phân tích enzyme.',
+        },
+      ],
+      asset_refs: [],
+    },
+    demand_state: {
+      current_quantity: 14,
+      moq: 20,
+      progress_percent: 70,
+      qualified_demand: true,
+      state: 'OPEN',
+      cta: 'CÙNG MỞ MẺ NGAY',
+    },
     selection_dat: 'Thung lũng đá vôi cao nguyên Đồng Văn trên 1.200m nơi loài hoa bạc hà mọc hoang dã chỉ nở trong sương muối mùa đông.',
     selection_nguoi: 'Anh Giàng A Páo — người Mông giữ nguyên quy tắc quay mật chín vít nắp già, không hạ nhiệt độ cô đặc nhân tạo.',
     selection_vi: 'Ngọt thanh dịu dàng, the mát tựa gió núi, màu vàng chanh ánh xanh đặc trưng.',
@@ -386,10 +582,10 @@ export const mockNgans: Ngan[] = [
   },
 ];
 
-// Single alias for backward compatibility with M2 tests
-export const mockNgan001 = mockNgans[2]; // Points to Hà Giang as legacy anchor
-export const mockProducer = mockProducers[2];
-export const mockProduct = mockProducts[2];
+// Golden Test #001 locked to OCA Cacao (mockNgans[0])
+export const mockNgan001 = mockNgans[0];
+export const mockProducer = mockProducers[0];
+export const mockProduct = mockProducts[0];
 
 // ------------------------------------------------------------------------------
 // 4. STORIES
@@ -439,7 +635,7 @@ Chúng tôi tìm đến lán của anh Giàng A Páo khi sương chiều vừa b
   },
 ];
 
-export const mockStory001 = mockStories[1];
+export const mockStory001 = mockStories[0];
 
 // ------------------------------------------------------------------------------
 // 5. ORDERS STORE

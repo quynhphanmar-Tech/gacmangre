@@ -29,7 +29,7 @@ export default function Navbar() {
             ĐI TÌM
           </Link>
           <Link
-            href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+            href="/ngan/cacao-oca"
             className="hover:text-[#A65F25] transition-colors flex items-center gap-2"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#A65F25] animate-pulse"></span>
@@ -42,7 +42,7 @@ export default function Navbar() {
             ĐÃ MỞ
           </Link>
           <Link
-            href="/stories/huong-hoa-dai-no-tren-vach-da-tai-meo-meo-vac"
+            href="/stories/hat-cacao-viet-nam-va-cach-lam-cua-rieng-minh"
             className="hover:text-[#A65F25] transition-colors"
           >
             CHUYỆN
@@ -52,7 +52,7 @@ export default function Navbar() {
         {/* Right CTA */}
         <div className="hidden md:flex items-center gap-5">
           <Link
-            href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+            href="/ngan/cacao-oca"
             className="px-5 py-2.5 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-wider font-semibold hover:bg-[#A65F25] transition-all duration-300 shadow-sm"
           >
             Mở Ngăn #001
@@ -82,7 +82,7 @@ export default function Navbar() {
               <ArrowUpRight className="w-4 h-4 text-[#665E58]" />
             </Link>
             <Link
-              href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+              href="/ngan/cacao-oca"
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center text-[#A65F25]"
             >
@@ -101,7 +101,7 @@ export default function Navbar() {
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/stories/huong-hoa-dai-no-tren-vach-da-tai-meo-meo-vac"
+              href="/stories/hat-cacao-viet-nam-va-cach-lam-cua-rieng-minh"
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center"
             >

@@ -1,8 +1,14 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
-import { mockStory001 } from '@/lib/data/mock-data';
+import { mockStories, mockStory001 } from '@/lib/data/mock-data';
 import { Story } from '@/types';
 
 export async function getStoryBySlug(slug: string): Promise<Story | null> {
+  const normalized = slug.trim().toLowerCase();
+  const mockFound = mockStories.find((s) => s.slug.toLowerCase() === normalized || s.id === slug);
+  if (mockFound) {
+    return mockFound;
+  }
+
   if (!isSupabaseConfigured || !supabase) {
     return mockStory001;
   }

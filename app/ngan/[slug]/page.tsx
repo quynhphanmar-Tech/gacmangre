@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getNganBySlug, getNganCtaSpec } from '@/services/ngan-service';
 import ProgressBar from '@/components/ProgressBar';
-import { MapPin, ArrowRight, ShieldCheck, Check, Sparkles, Camera, Clock, AlertTriangle, Truck, Award, Leaf } from 'lucide-react';
+import { MapPin, ArrowRight, ShieldCheck, Camera, Clock, Truck } from 'lucide-react';
+import { CanonicalEvidenceItem } from '@/types';
 
 interface NganPageProps {
   params: Promise<{ slug: string }>;
@@ -24,12 +25,19 @@ export default async function NganDetailPage({ params }: NganPageProps) {
     currency: 'VND',
   }).format(ngan.price);
 
-  const heroAsset = ngan.media_assets?.[0];
-  const handsAsset = ngan.media_assets?.[1];
-  const textureAsset = ngan.media_assets?.[4];
+  // Asset slot resolution with product integrity
+  const heroAsset = ngan.media_assets?.find((a) => a.slot === 'hero') || ngan.media_assets?.[0];
+  const handsAsset = ngan.media_assets?.find((a) => a.slot === 'hands') || ngan.media_assets?.[1];
+  const placeAsset = ngan.media_assets?.find((a) => a.slot === 'place') || ngan.media_assets?.[2];
+  const textureAsset = ngan.media_assets?.find((a) => a.slot === 'texture') || ngan.media_assets?.[3];
 
-  // Producer-specific Truth & Proposition Configuration
-  const isOca = ngan.slug.includes('oca') || ngan.product?.producer?.slug?.includes('oca');
+  const storyObj = ngan.story_object;
+  const demand = ngan.demand_state;
+  const canonicalLocation = ngan.product?.canonical_locations?.find((l) => l.role === 'RAW_MATERIAL_ORIGIN')?.name || ngan.product?.origin || 'Vùng đất nguyên bản';
+  const processingLocation = ngan.product?.canonical_locations?.find((l) => l.role === 'PROCESSING_LOCATION')?.name;
+
+  const currentQty = demand?.current_quantity ?? ngan.current_quantity;
+  const targetMoq = demand?.moq ?? ngan.moq;
 
   return (
     <div className="pb-32">
@@ -66,34 +74,46 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             {/* Editorial Secondary Photography */}
             <div className="grid grid-cols-3 gap-3">
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
-                <Image
-                  src={handsAsset?.url || (isOca ? "https://images.unsplash.com/photo-1549007994-cb92caebd54b?q=80&w=600&auto=format&fit=crop" : "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=600&auto=format&fit=crop")}
-                  alt="Đôi tay người làm"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {handsAsset ? (
+                  <Image
+                    src={handsAsset.url}
+                    alt={handsAsset.alt_text || 'Đôi tay người làm'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#EDE6DC] flex items-center justify-center text-xs text-[#8C827A]">Đôi tay</div>
+                )}
                 <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
                   Đôi tay
                 </span>
               </div>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
-                <Image
-                  src={isOca ? "https://images.unsplash.com/photo-1511381939415-e44015466834?q=80&w=600&auto=format&fit=crop" : "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?q=80&w=600&auto=format&fit=crop"}
-                  alt="Vùng đất sản vật"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {placeAsset ? (
+                  <Image
+                    src={placeAsset.url}
+                    alt={placeAsset.alt_text || 'Vùng đất sản vật'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#EDE6DC] flex items-center justify-center text-xs text-[#8C827A]">Vùng đất</div>
+                )}
                 <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
                   Vùng đất
                 </span>
               </div>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-[#E7DFD3] shadow-sm group">
-                <Image
-                  src={textureAsset?.url || (isOca ? "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?q=80&w=600&auto=format&fit=crop" : "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=600&auto=format&fit=crop")}
-                  alt="Chất lượng sản vật"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {textureAsset ? (
+                  <Image
+                    src={textureAsset.url}
+                    alt={textureAsset.alt_text || 'Chất lượng sản vật'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#EDE6DC] flex items-center justify-center text-xs text-[#8C827A]">Chất lượng</div>
+                )}
                 <span className="absolute bottom-1 left-2 text-[9px] text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
                   Chất lượng
                 </span>
@@ -115,9 +135,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               <div className="flex items-center gap-2 text-xs font-sans text-[#665E58]">
                 <MapPin className="w-3.5 h-3.5 text-[#A65F25]" />
                 <span>
-                  {isOca 
-                    ? 'Nguyên liệu: Huyện Châu Đức, Bà Rịa - Vũng Tàu' 
-                    : `Từ ${ngan.product?.origin || 'Vùng đất nguyên bản'}`}
+                  Nguyên liệu: {canonicalLocation}
                 </span>
               </div>
             </div>
@@ -129,7 +147,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                   Nguồn gốc
                 </span>
                 <span className="text-xs font-serif font-bold text-[#141211] block line-clamp-1">
-                  {isOca ? 'Châu Đức, BR-VT' : 'Mèo Vạc, Hà Giang'}
+                  {canonicalLocation}
                 </span>
                 <span className="text-[9px] text-emerald-800 font-mono block">GPS / Hồ sơ thật</span>
               </div>
@@ -138,7 +156,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                   Quy trình
                 </span>
                 <span className="text-xs font-serif font-bold text-[#141211] block line-clamp-1">
-                  {isOca ? 'Ủ thùng gỗ 6 ngày' : 'Quay chín vít nắp'}
+                  {storyObj?.making_process?.[0]?.split(':')[0] || 'Mộc nguyên bản'}
                 </span>
                 <span className="text-[9px] text-[#665E58] font-mono block">Mộc nguyên bản</span>
               </div>
@@ -147,7 +165,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                   Minh chứng
                 </span>
                 <span className="text-xs font-serif font-bold text-[#141211] block line-clamp-1">
-                  Truth Gate
+                  {storyObj?.evidence_refs?.[0]?.truth_status || 'VERIFIED'}
                 </span>
                 <span className="text-[9px] text-emerald-800 font-mono block">Đã qua thẩm định</span>
               </div>
@@ -176,14 +194,14 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                   Tiến độ cùng mở mẻ (MOQ)
                 </span>
                 <span className="text-xs font-mono font-bold text-[#141211]">
-                  {ngan.current_quantity} / {ngan.moq} phần
+                  {currentQty} / {targetMoq} phần
                 </span>
               </div>
-              <ProgressBar current={ngan.current_quantity} moq={ngan.moq} />
+              <ProgressBar current={currentQty} moq={targetMoq} />
               <p className="text-[11px] text-[#665E58] font-sans leading-relaxed">
-                {ngan.current_quantity >= ngan.moq
+                {currentQty >= targetMoq
                   ? 'Đã đủ số người cùng mở để kích hoạt mẻ sản xuất/thu hoạch tươi mới.'
-                  : `Cần thêm ${Math.max(0, ngan.moq - ngan.current_quantity)} người cùng mở mẻ để người làm bắt đầu thu gom mẻ tươi.`}
+                  : `Cần thêm ${Math.max(0, targetMoq - currentQty)} người cùng mở mẻ để người làm bắt đầu thu gom mẻ tươi.`}
               </p>
             </div>
 
@@ -220,7 +238,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                   href={`/dat-hang/${ngan.slug}`}
                   className="w-full py-4 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-all duration-300 shadow-md hover:shadow-lg text-center flex items-center justify-center gap-2"
                 >
-                  <span>CÙNG MỞ MẺ NGAY</span>
+                  <span>{demand?.cta || 'CÙNG MỞ MẺ NGAY'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               ) : (
@@ -257,7 +275,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[10px] uppercase font-mono tracking-wider text-[#A65F25]">
-                  {isOca ? 'VÙNG NGUYÊN LIỆU CHÂU ĐỨC' : 'CAO NGUYÊN ĐÁ MÈO VẠC'}
+                  VÙNG NGUYÊN LIỆU {canonicalLocation.toUpperCase()}
                 </span>
                 <h3 className="font-serif text-lg font-bold text-[#141211]">
                   {ngan.product?.name || ngan.title}
@@ -269,7 +287,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             </div>
 
             <p className="text-xs text-[#423B36] font-serif italic leading-relaxed">
-              &ldquo;{ngan.selection_chuyen}&rdquo;
+              &ldquo;{storyObj?.selection_chuyen || ngan.selection_chuyen}&rdquo;
             </p>
 
             <div className="pt-3 border-t border-[#E7DFD3] flex flex-wrap items-center justify-between text-[11px] text-[#665E58] font-sans gap-2">
@@ -290,14 +308,10 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             </span>
           </div>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#141211]">
-            {isOca 
-              ? 'Hạt cacao Châu Đức lên men thùng gỗ 6 ngày, giữ trọn bơ cacao tự nhiên'
-              : 'Mật ong hoa bạc hà khai thác triền đá vôi Đồng Văn - Mèo Vạc (>1.200m)'}
+            {storyObj?.headline || ngan.title}
           </h2>
           <p className="text-base font-serif text-[#423B36] leading-relaxed">
-            {isOca
-              ? 'Khác với cacao công nghiệp bị tách kiềm hóa và vắt kiệt bơ cacao để bán riêng, bột cacao của OCA giữ nguyên tỷ lệ bơ cacao tự nhiên trên 18%. Hạt được lên men thủ công trong thùng gỗ mộc từ 5–6 ngày trước khi phơi nắng giàn, mang vị chua thanh hoa quả nhiệt đới đặc trưng từ vùng trồng Châu Đức, Bà Rịa - Vũng Tàu.'
-              : 'Hoa bạc hà dại chỉ nở trên các hốc đá tai mèo lạnh buốt vào mùa đông (tháng 10 đến tháng 12). Đàn ong bản địa kiếm mật trong điều kiện khắc nghiệt, tạo nên dòng mật sánh đặc màu vàng chanh ánh xanh với hậu vị the mát sâu cổ họng.'}
+            {storyObj?.why_this || ngan.short_description}
           </p>
         </section>
 
@@ -307,12 +321,10 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             03 — VÙNG ĐẤT (TERROIR & ORIGIN)
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#141211]">
-            {isOca ? 'Thổ nhưỡng đất đỏ bazan Châu Đức & Xưởng chế biến Bình Giã' : 'Thung lũng đá tai mèo Mèo Vạc, Hà Giang (Trên 1.200m)'}
+            {canonicalLocation} {processingLocation ? `& ${processingLocation}` : ''}
           </h2>
           <p className="text-base font-serif text-[#423B36] leading-relaxed">
-            {isOca
-              ? 'Vùng nguyên liệu cacao tọa lạc tại Huyện Châu Đức, Tỉnh Bà Rịa - Vũng Tàu với lớp đất đỏ bazan màu mỡ và nắng ấm quanh năm, giúp cây cacao Trinitario tích lũy hàm lượng bơ tự nhiên cao. Xưởng ủ men và chế biến đặt tại Bình Giã, kiểm soát chặt chẽ từng mẻ ủ.'
-              : ngan.selection_dat}
+            {storyObj?.selection_dat || ngan.selection_dat}
           </p>
         </section>
 
@@ -338,7 +350,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                 {ngan.product?.producer?.brand_name} · {ngan.product?.producer?.location}
               </p>
               <p className="text-sm text-[#423B36] leading-relaxed font-sans">
-                {ngan.selection_nguoi}
+                {storyObj?.selection_nguoi || ngan.selection_nguoi}
               </p>
             </div>
           </div>
@@ -350,21 +362,23 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             05 — ĐÔI TAY & CÁCH LÀM (MAKING PROCESS)
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#141211]">
-            {isOca ? 'Kiểm soát lên men vi sinh và nghiền mộc chậm' : 'Quy trình quay mật thủ công, tôn trọng tự nhiên'}
+            Quy trình chế biến mộc, tôn trọng nguyên bản
           </h2>
           <div className="text-sm font-sans text-[#665E58] space-y-3 leading-relaxed">
-            {isOca ? (
-              <>
-                <p>• <strong>Thu hái chọn lọc:</strong> Chỉ hạ quả khi vỏ chín vàng đều, bóc hạt ngay trong ngày để giữ men tươi.</p>
-                <p>• <strong>Lên men thùng gỗ mộc:</strong> Ủ 5–6 ngày với lớp lá chuối phủ kín, đảo hạt định kỳ để giải phóng nốt hương hoa quả.</p>
-                <p>• <strong>Phơi giàn nắng tự nhiên:</strong> Làm khô chậm dưới nắng giàn cao ráo, tuyệt đối không sấy khói cưỡng bức làm hỏng bơ.</p>
-              </>
+            {storyObj?.making_process && storyObj.making_process.length > 0 ? (
+              storyObj.making_process.map((step, idx) => {
+                const parts = step.split(':');
+                if (parts.length > 1) {
+                  return (
+                    <p key={idx}>
+                      • <strong>{parts[0]}:</strong>{parts.slice(1).join(':')}
+                    </p>
+                  );
+                }
+                return <p key={idx}>• {step}</p>;
+              })
             ) : (
-              <>
-                <p>• <strong>Hạ tầng ong:</strong> Chỉ gạt nhẹ lớp sáp vít nắp khi mật đã chín già đặc tự nhiên.</p>
-                <p>• <strong>Không qua đun nóng:</strong> Giữ nguyên vẹn các enzyme kháng khuẩn và hạt phấn hoa bạc hà tím ngát.</p>
-                <p>• <strong>Lọc vải thưa:</strong> Chỉ loại bỏ sáp vụn, giữ trọn vẹn màu vàng chanh ánh xanh nguyên bản.</p>
-              </>
+              <p>• {ngan.selection_nguoi}</p>
             )}
           </div>
         </section>
@@ -379,39 +393,45 @@ export default async function NganDetailPage({ params }: NganPageProps) {
           </div>
           
           <div className="space-y-4 pt-2">
-            {/* Verified Fact Item */}
-            <div className="p-4 rounded-2xl bg-[#F7F9F6] border border-[#D7E2D3] space-y-1.5">
-              <div className="flex items-center gap-2">
+            {storyObj?.evidence_refs && storyObj.evidence_refs.length > 0 ? (
+              storyObj.evidence_refs.map((evd: CanonicalEvidenceItem) => (
+                <div
+                  key={evd.id}
+                  className={`p-4 rounded-2xl border space-y-1.5 ${
+                    evd.truth_status === 'VERIFIED'
+                      ? 'bg-[#F7F9F6] border-[#D7E2D3]'
+                      : 'bg-[#FFF9F2] border-[#F0DCB8]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
+                        evd.truth_status === 'VERIFIED'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-900'
+                      }`}
+                    >
+                      {evd.truth_status}
+                    </span>
+                    <span className="text-xs font-bold text-[#141211]">
+                      {evd.claim}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#423B36] font-sans leading-relaxed">
+                    {evd.notes || 'Minh chứng được xác thực từ hồ sơ thực địa và tư liệu chính thức.'}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 rounded-2xl bg-[#F7F9F6] border border-[#D7E2D3] space-y-1.5">
                 <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono font-bold">
                   VERIFIED FACT
                 </span>
-                <span className="text-xs font-bold text-[#141211]">
-                  {isOca ? 'Pháp nhân & Hồ sơ xuất khẩu Nhật Bản' : 'Tọa độ thực địa & Nhật ký khai thác'}
-                </span>
+                <p className="text-xs text-[#423B36] font-sans leading-relaxed">
+                  Thông tin sản vật đã qua đối soát thực địa và xác nhận hồ sơ từ nhà sản xuất.
+                </p>
               </div>
-              <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                {isOca 
-                  ? 'Công ty TNHH OCA Việt Nhật (ĐKKD 3502512543), có chứng từ xuất khẩu chính ngạch sang thị trường Nhật Bản và nhà xưởng đạt chuẩn an toàn VSTP.'
-                  : 'Ghi nhận thực địa có GPS tại Mèo Vạc (23°09\'N, 105°24\'E), sổ theo dõi thời gian quay mật và kiểm nghiệm thủy phần tự nhiên dưới 19%.'}
-              </p>
-            </div>
-
-            {/* Producer Claim Item with Explicit Epistemic Badge */}
-            <div className="p-4 rounded-2xl bg-[#FFF9F2] border border-[#F0DCB8] space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-mono font-bold">
-                  PRODUCER CLAIM
-                </span>
-                <span className="text-xs font-bold text-[#141211]">
-                  {isOca ? 'Tuyên bố: “Vùng trồng canh tác tự nhiên / Hữu cơ”' : 'Tuyên bố: “100% nguyên chất hoang dã”'}
-                </span>
-              </div>
-              <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                {isOca
-                  ? 'Nhà vườn tuyên bố không dùng thuốc bảo vệ thực vật hóa học trong vụ thu hoạch. (Ghi chú minh bạch: Gạc Măng Rê chưa nhận bản scan chứng nhận Organic quốc tế độc lập, dữ liệu được ghi nhận theo cam kết của người làm).'
-                  : 'Người nuôi ong cam kết không can thiệp đun nhiệt hạ thủy phần. Được kiểm chứng bằng mẫu nếm trực tiếp tại chỗ nhưng chưa có lab test phổ quang phân tích enzyme.'}
-              </p>
-            </div>
+            )}
           </div>
         </section>
 
@@ -431,7 +451,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             </div>
             <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <span className="text-[#665E58]">Hương vị cảm nhận</span>
-              <span className="text-[#141211] font-semibold">{ngan.selection_vi}</span>
+              <span className="text-[#141211] font-semibold">{storyObj?.selection_vi || ngan.selection_vi}</span>
             </div>
             <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <span className="text-[#665E58]">Thời hạn sử dụng</span>
@@ -440,7 +460,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <span className="text-[#665E58]">Vật phẩm đi kèm</span>
               <span className="text-[#141211] font-semibold">
-                {isOca ? 'Hướng dẫn nếm vị mộc & công thức pha cacao ấm' : 'Thẻ ghi nhận mẻ thu hái & mã truy xuất nguồn gốc'}
+                Thẻ câu chuyện sản vật & Hướng dẫn thưởng thức
               </span>
             </div>
           </div>
@@ -458,9 +478,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                 1. Reason to Care
               </span>
               <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                {isOca 
-                  ? 'Sản phẩm giữ nguyên bơ cacao tươi, mang lại hương vị sâu lắng và giá trị dinh dưỡng cao nhất.'
-                  : 'Mật hoa bạc hà thật khai thác tự nhiên chỉ có một mùa duy nhất trong năm, không thể tái sản xuất công nghiệp.'}
+                {storyObj?.why_preorder_care || 'Sản phẩm giữ trọn phẩm chất tự nhiên tươi mới, mang lại giá trị chân thật nhất.'}
               </p>
             </div>
 
@@ -469,9 +487,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                 2. Reason to Trust
               </span>
               <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                {isOca
-                  ? 'Minh bạch nguồn gốc từng lô hạt, xuất xứ Châu Đức (Bà Rịa - Vũng Tàu) rõ ràng, pháp nhân xưởng sản xuất có đăng ký chính ngạch.'
-                  : 'Kiểm nghiệm thủy phần trực tiếp tại bản, sổ tay nhật ký khai thác và quay mật của anh Giàng A Páo.'}
+                {storyObj?.why_preorder_trust || `Minh bạch xuất xứ tại ${canonicalLocation}, pháp nhân và quy trình được đối soát rõ ràng.`}
               </p>
             </div>
 
@@ -479,27 +495,15 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               <span className="text-[11px] font-bold text-[#A65F25] uppercase tracking-wide block">
                 3. Reason to Act Now
               </span>
-              {isOca ? (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 text-[10px] text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    <Clock className="w-3 h-3 shrink-0" />
-                    <span>Gom mẻ rang theo đợt</span>
-                  </div>
-                  <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                    Xưởng chỉ rang và nghiền khi gom đủ 30 hộp để đảm bảo mẻ bột tươi mới nhất đến tay người mở.
-                  </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  <Clock className="w-3 h-3 shrink-0" />
+                  <span>Gom mẻ theo đợt</span>
                 </div>
-              ) : (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 text-[10px] text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    <Clock className="w-3 h-3 shrink-0" />
-                    <span>Mùa vụ hữu hạn (Tháng 10–12)</span>
-                  </div>
-                  <p className="text-xs text-[#423B36] font-sans leading-relaxed">
-                    Sản lượng vụ đông 2026 giới hạn theo số cầu ong thực tế của bản. Không thu hoạch thêm sau khi hết mùa hoa.
-                  </p>
-                </div>
-              )}
+                <p className="text-xs text-[#423B36] font-sans leading-relaxed">
+                  {storyObj?.why_preorder_act_now || `Chỉ hạ mẻ và đóng gói khi đủ ${targetMoq} phần đăng ký để bảo đảm độ tươi mới.`}
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -512,7 +516,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div className="space-y-2">
               <h3 className="font-serif text-lg font-bold text-[#141211]">
-                Cùng mở gom mẻ ({ngan.moq} phần)
+                Cùng mở gom mẻ ({targetMoq} phần)
               </h3>
               <p className="text-xs text-[#665E58] font-sans leading-relaxed">
                 Người làm nông nghiệp thủ công không thể xuất từng mẻ nhỏ lẻ. Cơ chế mở Ngăn giúp tập hợp đủ số lượng tối thiểu để người làm yên tâm hạ mẻ tươi nhất.
@@ -542,18 +546,18 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             </div>
             <div className="flex justify-between py-2 border-b border-[#E7DFD3]">
               <span className="text-[#665E58]">Sản lượng mẻ mục tiêu</span>
-              <span className="font-semibold text-[#141211]">{ngan.moq} {ngan.product?.unit}</span>
+              <span className="font-semibold text-[#141211]">{targetMoq} {ngan.product?.unit}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-[#E7DFD3]">
               <span className="text-[#665E58]">Hình thức chế biến / thu hoạch</span>
               <span className="font-semibold text-[#141211]">
-                {isOca ? 'Ủ men thùng gỗ & Nghiền mộc không kiềm' : 'Hạ tầng quay chín già, lọc thô tự nhiên'}
+                {storyObj?.making_process?.[0]?.split(':')[0] || 'Chế biến thủ công mộc'}
               </span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-[#665E58]">Tình trạng mẻ</span>
               <span className="font-mono font-bold text-[#A65F25]">
-                {ngan.current_quantity >= ngan.moq ? 'ĐÃ ĐẠT MOQ — CHỜ ĐÓNG MẺ' : 'ĐANG GOM ĐƠN CÙNG MỞ'}
+                {currentQty >= targetMoq ? 'ĐÃ ĐẠT MOQ — CHỜ ĐÓNG MẺ' : 'ĐANG GOM ĐƠN CÙNG MỞ'}
               </span>
             </div>
           </div>
@@ -566,7 +570,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               11 — KỲ VỌNG VẬN HÀNH & GIAO HÀNG (FULFILLMENT EXPECTATION)
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-mono font-bold">
-              {isOca ? 'PRODUCER SHIPS DIRECT' : 'GMR BATCH CONSOLIDATION'}
+              PRODUCER DIRECT & GMR QUALITY CHECK
             </span>
           </div>
 
@@ -577,9 +581,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                 <span>Phương thức giao nhận:</span>
               </div>
               <p className="text-[#665E58] leading-relaxed">
-                {isOca
-                  ? 'Mô hình A (Producer Ships): Sau khi đạt MOQ, xưởng đóng mẻ bột tươi và gửi trực tiếp qua đơn vị vận chuyển có mã tracking độc lập gửi tới bạn.'
-                  : 'Mô hình B (GMR Batch): Mật ong được gom thành lô từ bản Mèo Vạc chuyển về kho trung chuyển Gạc Măng Rê tại Hà Nội để kiểm tra cảm quan trước khi phân phối.'}
+                Sau khi đạt MOQ, sản vật được thu gom trực tiếp từ xưởng/nhà vườn, đóng gói cẩn trọng và vận chuyển đến tận tay bạn với mã vận đơn tracking riêng.
               </p>
             </div>
 
@@ -591,7 +593,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               <div className="p-4 rounded-xl border border-[#E7DFD3] bg-white">
                 <span className="text-[#665E58] block mb-1">Quy cách bao bì bảo quản:</span>
                 <strong className="text-sm text-[#141211]">
-                  {isOca ? 'Hộp màng nhôm kín khí chống ẩm' : 'Chai thủy tinh bọc chống sốc & chống biến tính nhiệt'}
+                  Bao bì kín khí chuyên dụng, bảo vệ hương vị nguyên bản
                 </strong>
               </div>
             </div>
@@ -604,19 +606,17 @@ export default async function NganDetailPage({ params }: NganPageProps) {
             12 — LÝ DO GẠC MĂNG RÊ MỞ NGĂN NÀY (GMR CURATION REASON)
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold leading-tight">
-            &ldquo;{ngan.selection_chuyen}&rdquo;
+            &ldquo;{storyObj?.selection_chuyen || ngan.selection_chuyen}&rdquo;
           </h2>
           <p className="text-xs sm:text-sm text-[#EFE8DC]/80 font-sans leading-relaxed pt-2">
-            {isOca
-              ? 'Chúng tôi mở Ngăn này để cùng bạn chứng minh rằng: nông sản chế biến sâu của người Việt Nam hoàn toàn có thể tự đứng vững bằng phẩm chất nguyên bản mà không cần ẩn mình sau các nhãn hàng gia công công nghiệp.'
-              : 'Chúng tôi mở Ngăn này để bảo vệ giá trị thật của người nuôi ong trên vách đá tai mèo Mèo Vạc, nơi giọt mật hoa dại xứng đáng được trả đúng giá trị thay vì bị ép giá bởi thị trường hương liệu công nghiệp.'}
+            {storyObj?.curation_reason || ngan.short_description}
           </p>
 
           <div className="pt-6 border-t border-[#332B25] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-left">
               <span className="text-[10px] text-[#A89D91] font-mono uppercase block">Tiến độ hiện tại:</span>
               <span className="font-serif text-lg font-bold text-white">
-                {ngan.current_quantity} / {ngan.moq} phần đã đăng ký
+                {currentQty} / {targetMoq} phần đã đăng ký
               </span>
             </div>
 
@@ -625,7 +625,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
                 href={`/dat-hang/${ngan.slug}`}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-9 py-4 rounded-full bg-[#A65F25] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#864918] transition-all duration-300 shadow-lg text-center"
               >
-                <span>{ctaSpec.ctaText}</span>
+                <span>{demand?.cta || ctaSpec.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
@@ -654,7 +654,7 @@ export default async function NganDetailPage({ params }: NganPageProps) {
               href={`/dat-hang/${ngan.slug}`}
               className="flex-1 py-3.5 px-6 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-pantryst font-bold hover:bg-[#A65F25] transition-colors text-center shadow"
             >
-              {ctaSpec.ctaText}
+              {demand?.cta || ctaSpec.ctaText}
             </Link>
           ) : (
             <div className="flex-1 py-3.5 px-6 rounded-full bg-[#EFE8DC] text-[#423B36] text-xs uppercase tracking-pantryst font-bold text-center border border-[#E7DFD3]">

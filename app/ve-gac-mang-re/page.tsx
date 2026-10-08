@@ -80,7 +80,7 @@ export default function VeGacMangRePage() {
 
       <div className="text-center pt-4">
         <Link
-          href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+          href="/ngan/cacao-oca"
           className="inline-block px-8 py-4 rounded-full bg-[#8C4A2F] text-[#FAF7F2] font-semibold text-xs uppercase tracking-widest hover:bg-[#723922] transition-colors shadow-lg"
         >
           Khám phá Ngăn #001

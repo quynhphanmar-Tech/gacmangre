@@ -23,12 +23,12 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-[#D6BFA0]">
               <li>
-                <Link href="/stories/huong-hoa-dai-no-tren-vach-da-tai-meo-meo-vac" className="hover:text-white transition">
-                  Câu chuyện Hà Giang
+                <Link href="/stories/hat-cacao-viet-nam-va-cach-lam-cua-rieng-minh" className="hover:text-white transition">
+                  Câu chuyện Cacao OCA
                 </Link>
               </li>
               <li>
-                <Link href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang" className="hover:text-white transition">
+                <Link href="/ngan/cacao-oca" className="hover:text-white transition">
                   Mở Ngăn #001
                 </Link>
               </li>

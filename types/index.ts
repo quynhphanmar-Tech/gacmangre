@@ -52,14 +52,16 @@ export interface MediaAsset {
   url: string;
   thumbnail_url?: string;
   asset_type: AssetType;
-  source: string;              // e.g. "Chuyến thực địa Gạc Măng Rê 10/2026", "Zalo Giàng A Páo"
-  license: string;             // e.g. "GacMangRe Exclusive", "Producer Authorized"
-  credit: string;              // e.g. "Ảnh: Nguyễn Văn A", "Cung cấp bởi Giàng A Páo"
+  product_id?: string;
+  producer_id?: string;
+  source?: string;              // e.g. "Chuyến thực địa Gạc Măng Rê 10/2026", "Zalo Giàng A Páo"
+  license?: string;             // e.g. "GacMangRe Exclusive", "Producer Authorized"
+  credit?: string;              // e.g. "Ảnh: Nguyễn Văn A", "Cung cấp bởi Giàng A Páo"
   is_verified: boolean;        // true nếu là ảnh chụp thực tế đã xác thực
   alt_text: string;            // Mô tả ảnh trợ năng & SEO
   caption?: string;            // Chú thích chân thực
-  slot?: 'hero' | 'hands' | 'landscape' | 'process' | 'texture' | 'producer';
-  created_at: string;
+  slot?: 'hero' | 'hands' | 'landscape' | 'place' | 'process' | 'texture' | 'producer';
+  created_at?: string;
 }
 
 export type LocationRole =
@@ -136,6 +138,46 @@ export interface Product {
   producer?: Producer;
 }
 
+export interface CanonicalEvidenceItem {
+  id: string;
+  claim: string;
+  source_id: string;
+  source_url: string;
+  source_type: string;
+  truth_status: 'VERIFIED' | 'PRODUCER_CLAIM' | 'EDITORIAL_INTERPRETATION' | 'MISSING_EVIDENCE' | 'UNKNOWN';
+  confidence?: number;
+  evidence_type?: string;
+  notes?: string;
+}
+
+export interface StoryObject {
+  id: string;
+  headline: string;
+  excerpt: string;
+  full_content?: string;
+  why_this: string;
+  why_preorder_care: string;
+  why_preorder_trust: string;
+  why_preorder_act_now: string;
+  making_process: string[];
+  selection_dat: string;
+  selection_nguoi: string;
+  selection_vi: string;
+  selection_chuyen: string;
+  curation_reason: string;
+  evidence_refs: CanonicalEvidenceItem[];
+  asset_refs: MediaAsset[];
+}
+
+export interface DemandState {
+  current_quantity: number;
+  moq: number;
+  progress_percent: number;
+  qualified_demand: boolean;
+  state: NganStatus;
+  cta: string;
+}
+
 export interface Ngan {
   id: string;
   number: string;
@@ -152,6 +194,8 @@ export interface Ngan {
   hero_image: string;
   gallery: string[];
   media_assets?: MediaAsset[];
+  story_object?: StoryObject;
+  demand_state?: DemandState;
   selection_dat: string;
   selection_nguoi: string;
   selection_vi: string;

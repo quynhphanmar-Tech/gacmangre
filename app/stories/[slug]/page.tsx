@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getStoryBySlug } from '@/services/story-service';
+import { mockNgans } from '@/lib/data/mock-data';
 import { MapPin, ArrowRight, Compass, Camera } from 'lucide-react';
 
 interface StoryPageProps {
@@ -17,13 +18,14 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
   }
 
   const coverAsset = story.media_assets?.[0];
+  const linkedNgan = mockNgans.find((n) => n.product_id === story.product_id) || mockNgans[0];
 
   return (
     <article className="pb-28">
       {/* 1. HERO STORY — EDITORIAL MAGAZINE LAYOUT */}
       <section className="pt-12 md:pt-24 pb-14 px-5 sm:px-8 max-w-4xl mx-auto text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EFE8DC] text-[11px] font-mono font-semibold uppercase tracking-pantryst text-[#A65F25]">
-          <span>KÝ SỰ THỰC ĐỊA · NGĂN #001</span>
+          <span>KÝ SỰ THỰC ĐỊA · NGĂN {linkedNgan.number}</span>
         </div>
 
         <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold text-[#141211] leading-[1.18]">
@@ -37,12 +39,12 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
         <div className="flex items-center justify-center gap-4 text-xs font-sans text-[#665E58] pt-2">
           <span className="flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-[#A65F25]" />
-            Mèo Vạc, Hà Giang
+            {story.producer?.location || story.product?.origin || 'Việt Nam'}
           </span>
           <span>•</span>
-          <span>Độ cao 1.200m</span>
+          <span>{story.product?.name || 'Sản vật chọn lọc'}</span>
           <span>•</span>
-          <span>Mùa đông 2026</span>
+          <span>Mùa 2026</span>
         </div>
       </section>
 
@@ -67,7 +69,7 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
           )}
           <div className="absolute bottom-3 left-4 right-4">
             <p className="text-[10px] text-[#FAF8F5]/90 bg-[#141211]/60 backdrop-blur-sm px-3 py-1 rounded-md line-clamp-1 inline-block">
-              {coverAsset?.caption || 'Thung lũng đá tai mèo Mèo Vạc mùa sương muối.'} · {coverAsset?.credit || 'Ảnh: Gạc Măng Rê'}
+              {coverAsset?.caption || story.title} · {coverAsset?.credit || 'Ảnh: Gạc Măng Rê'}
             </p>
           </div>
         </div>
@@ -77,16 +79,16 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
       <div className="max-w-3xl mx-auto px-5 sm:px-8 space-y-14">
         <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E7DFD3] shadow-pantry grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
           <div className="space-y-1">
-            <span className="text-[#665E58] block">Người quay mật</span>
-            <strong className="text-sm text-[#141211] font-semibold">Giàng A Páo (18 năm nghề)</strong>
+            <span className="text-[#665E58] block">Người sản xuất</span>
+            <strong className="text-sm text-[#141211] font-semibold">{story.producer?.name || 'Người làm tử tế'}</strong>
           </div>
           <div className="space-y-1">
-            <span className="text-[#665E58] block">Loài hoa nguồn</span>
-            <strong className="text-sm text-[#141211] font-semibold">Bạc hà mọc hoang vách đá</strong>
+            <span className="text-[#665E58] block">Sản vật</span>
+            <strong className="text-sm text-[#141211] font-semibold">{story.product?.name || 'Sản vật địa phương'}</strong>
           </div>
           <div className="space-y-1">
-            <span className="text-[#665E58] block">Quy chuẩn mẻ</span>
-            <strong className="text-sm text-[#A65F25] font-semibold">100% mật thô không hạ nhiệt</strong>
+            <span className="text-[#665E58] block">Nguồn gốc</span>
+            <strong className="text-sm text-[#A65F25] font-semibold">{story.product?.origin || 'Xuất xứ xác thực'}</strong>
           </div>
         </div>
 
@@ -139,16 +141,16 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
               Chiếc tủ đang mở
             </span>
             <h3 className="font-serif text-3xl font-bold text-[#FAF8F5]">
-              Mở Ngăn #001: Mật ong hoa dại Hà Giang
+              Mở Ngăn {linkedNgan.number}: {linkedNgan.title}
             </h3>
             <p className="text-xs sm:text-sm text-[#EFE8DC]/80 max-w-md mx-auto font-sans leading-relaxed">
-              Câu chuyện kết tinh thành một ngăn sản vật có thật. Hiện đã có 74 người cùng mở trên mục tiêu 100 phần.
+              Câu chuyện kết tinh thành một ngăn sản vật có thật. Hiện đã có {linkedNgan.current_quantity} người cùng mở trên mục tiêu {linkedNgan.moq} phần.
             </p>
           </div>
 
           <div className="pt-2">
             <Link
-              href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+              href={`/ngan/${linkedNgan.slug}`}
               className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#A65F25] text-[#FAF8F5] font-semibold text-xs uppercase tracking-pantryst hover:bg-[#864918] transition-all duration-300 shadow-lg"
             >
               <span>XEM NGĂN & CÙNG MỞ</span>

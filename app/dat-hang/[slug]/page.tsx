@@ -12,8 +12,8 @@ export default function OrderFormPage() {
   const searchParams = useSearchParams();
   const params = useParams();
 
-  // Resolve slug dynamically
-  const slug = (typeof params?.slug === 'string' ? params.slug : '') || 'mat-ong-bac-ha-ha-giang';
+  // Resolve slug dynamically — Golden Test #001 is default
+  const slug = (typeof params?.slug === 'string' ? params.slug : '') || 'cacao-len-men-thu-cong-oca';
   const normalized = slug.trim().toLowerCase();
 
   // Match corresponding Ngăn

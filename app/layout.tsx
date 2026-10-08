@@ -22,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#211D1A]">
         <Navbar />
         <main className="flex-1">{children}</main>
