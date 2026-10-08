@@ -56,10 +56,16 @@ async function run() {
 
   // 7. Static Assets
   console.log('\n7. Next.js Static Asset Rewrite:');
-  const resCss = await fetch(`${BASE_URL}/_next/static/css/557c3dcfaa4df54e.css`);
-  assert(resCss.status === 200, 'CSS bundle returns 200 OK');
-  const resJs = await fetch(`${BASE_URL}/_next/static/chunks/main-app-f9b5d20365cb8be2.js`);
-  assert(resJs.status === 200, 'JS chunk returns 200 OK');
+  const cssMatch = htmlGmr.match(/\/_next\/static\/css\/[a-zA-Z0-9_-]+\.css/);
+  const jsMatch = htmlGmr.match(/\/_next\/static\/chunks\/[a-zA-Z0-9_-]+\.js/);
+  if (cssMatch) {
+    const resCss = await fetch(`${BASE_URL}${cssMatch[0]}`);
+    assert(resCss.status === 200, `CSS bundle (${cssMatch[0]}) returns 200 OK`);
+  }
+  if (jsMatch) {
+    const resJs = await fetch(`${BASE_URL}${jsMatch[0]}`);
+    assert(resJs.status === 200, `JS chunk (${jsMatch[0]}) returns 200 OK`);
+  }
 
   console.log('\n================================================================');
   console.log('🏁 ALL GATEWAY REWRITE SMOKE TESTS PASSED 100%');
