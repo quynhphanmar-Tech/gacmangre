@@ -2,6 +2,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Sparkles, Heart, ShieldCheck, Compass } from 'lucide-react';
 
+export const metadata = {
+  title: 'Về Gạc Măng Rê — Tuyên Ngôn Cất Vị Quê Nhà',
+  description:
+    'Gạc Măng Rê không phải là sàn đặc sản. Đây là chiếc tủ tuyển chọn: cất giữ nông sản nguyên bản từ những người làm tử tế khắp Việt Nam theo 4 tiêu chuẩn Đất · Người · Vị · Chuyện.',
+  alternates: {
+    canonical: 'https://brandtalk.asia/gacmangre/ve-gac-mang-re',
+  },
+};
+
 export default function VeGacMangRePage() {
   return (
     <div className="py-16 md:py-24 px-4 sm:px-6 max-w-4xl mx-auto space-y-16">

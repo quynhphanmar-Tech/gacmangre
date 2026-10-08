@@ -5,8 +5,45 @@ import { getStoryBySlug } from '@/services/story-service';
 import { mockNgans } from '@/lib/data/mock-data';
 import { MapPin, ArrowRight, Compass, Camera } from 'lucide-react';
 
+import { Metadata } from 'next';
+
 interface StoryPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: StoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const story = await getStoryBySlug(slug);
+
+  if (!story) {
+    return {
+      title: 'Ký sự không tồn tại · Gạc Măng Rê',
+    };
+  }
+
+  const canonicalUrl = `https://brandtalk.asia/gacmangre/stories/${slug}`;
+
+  return {
+    title: `${story.title} | Ký Sự Gạc Măng Rê`,
+    description: story.excerpt,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: story.title,
+      description: story.excerpt,
+      url: canonicalUrl,
+      images: [
+        {
+          url: story.cover_image,
+          width: 1200,
+          height: 630,
+          alt: story.title,
+        },
+      ],
+      type: 'article',
+    },
+  };
 }
 
 export default async function StoryDetailPage({ params }: StoryPageProps) {
@@ -20,8 +57,37 @@ export default async function StoryDetailPage({ params }: StoryPageProps) {
   const coverAsset = story.media_assets?.[0];
   const linkedNgan = mockNgans.find((n) => n.product_id === story.product_id) || mockNgans[0];
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: story.title,
+    description: story.excerpt,
+    image: [coverAsset?.url || story.cover_image],
+    author: {
+      '@type': 'Organization',
+      name: 'Gạc Măng Rê Thực Địa',
+      url: 'https://brandtalk.asia/gacmangre',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Gạc Măng Rê',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://brandtalk.asia/gacmangre/favicon.ico',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://brandtalk.asia/gacmangre/stories/${slug}`,
+    },
+  };
+
   return (
     <article className="pb-28">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {/* 1. HERO STORY — EDITORIAL MAGAZINE LAYOUT */}
       <section className="pt-12 md:pt-24 pb-14 px-5 sm:px-8 max-w-4xl mx-auto text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EFE8DC] text-[11px] font-mono font-semibold uppercase tracking-pantryst text-[#A65F25]">

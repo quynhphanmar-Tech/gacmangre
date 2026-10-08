@@ -20,32 +20,32 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Contemporary Editorial Navigation (Brief v1.1): ĐI TÌM · MỞ NGĂN · ĐÃ MỞ · CHUYỆN */}
-        <nav className="hidden md:flex items-center space-x-10 text-xs font-semibold tracking-pantryst uppercase text-[#423B36]">
-          <Link
-            href="/#di-tim"
-            className="hover:text-[#A65F25] transition-colors"
-          >
-            ĐI TÌM
-          </Link>
+        {/* Contemporary Editorial Navigation (Pilot v1.0): MỞ NGĂN · KÝ SỰ CHUYỆN · VỀ GẠC MĂNG RÊ */}
+        <nav className="hidden md:flex items-center space-x-9 text-xs font-semibold tracking-pantryst uppercase text-[#423B36]">
           <Link
             href="/ngan/cacao-oca"
-            className="hover:text-[#A65F25] transition-colors flex items-center gap-2"
+            className="hover:text-[#A65F25] transition-colors flex items-center gap-1.5"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#A65F25] animate-pulse"></span>
-            MỞ NGĂN
+            NGĂN #001 (CACAO)
           </Link>
           <Link
-            href="/da-mo"
-            className="hover:text-[#A65F25] transition-colors text-[#665E58]"
+            href="/ngan/mat-ong-bac-ha-meo-vac"
+            className="hover:text-[#A65F25] transition-colors"
           >
-            ĐÃ MỞ
+            NGĂN #002 (MẬT ONG)
           </Link>
           <Link
             href="/stories/hat-cacao-viet-nam-va-cach-lam-cua-rieng-minh"
             className="hover:text-[#A65F25] transition-colors"
           >
-            CHUYỆN
+            CÂU CHUYỆN
+          </Link>
+          <Link
+            href="/ve-gac-mang-re"
+            className="hover:text-[#A65F25] transition-colors text-[#665E58]"
+          >
+            VỀ GẠC MĂNG RÊ
           </Link>
         </nav>
 
@@ -55,7 +55,7 @@ export default function Navbar() {
             href="/ngan/cacao-oca"
             className="px-5 py-2.5 rounded-full bg-[#141211] text-[#FAF8F5] text-xs uppercase tracking-wider font-semibold hover:bg-[#A65F25] transition-all duration-300 shadow-sm"
           >
-            Mở Ngăn #001
+            Mở Ngăn Đầu Tiên
           </Link>
         </div>
 
@@ -74,30 +74,22 @@ export default function Navbar() {
         <div className="md:hidden bg-[#FAF8F5] border-b border-[#E7DFD3] px-6 py-8 space-y-6 shadow-xl animate-fadeIn">
           <nav className="flex flex-col space-y-5 text-sm uppercase tracking-pantryst font-semibold text-[#262220]">
             <Link
-              href="/#di-tim"
-              onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center"
-            >
-              <span>ĐI TÌM</span>
-              <ArrowUpRight className="w-4 h-4 text-[#665E58]" />
-            </Link>
-            <Link
               href="/ngan/cacao-oca"
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center text-[#A65F25]"
             >
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#A65F25]"></span>
-                MỞ NGĂN #001
+                MỞ NGĂN #001 (CACAO OCA)
               </span>
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/da-mo"
+              href="/ngan/mat-ong-bac-ha-meo-vac"
               onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center text-[#665E58]"
+              className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center text-[#262220]"
             >
-              <span>ĐÃ MỞ</span>
+              <span>MỞ NGĂN #002 (MẬT ONG)</span>
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
@@ -105,7 +97,15 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center"
             >
-              <span>CHUYỆN</span>
+              <span>CÂU CHUYỆN SẢN VẬT</span>
+              <ArrowUpRight className="w-4 h-4 text-[#665E58]" />
+            </Link>
+            <Link
+              href="/ve-gac-mang-re"
+              onClick={() => setMobileMenuOpen(false)}
+              className="hover:text-[#A65F25] py-1 border-b border-[#E7DFD3]/50 flex justify-between items-center text-[#665E58]"
+            >
+              <span>VỀ GẠC MĂNG RÊ</span>
               <ArrowUpRight className="w-4 h-4 text-[#665E58]" />
             </Link>
             <Link

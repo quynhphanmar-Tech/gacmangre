@@ -8,8 +8,45 @@ import EvidenceDrawer from '@/components/EvidenceDrawer';
 import { MapPin, ArrowRight, ShieldCheck, Camera, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CanonicalEvidenceItem, MediaAsset } from '@/types';
 
+import { Metadata } from 'next';
+
 interface NganPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: NganPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const ngan = await getNganBySlug(slug);
+
+  if (!ngan) {
+    return {
+      title: 'Ngăn không tồn tại · Gạc Măng Rê',
+    };
+  }
+
+  const canonicalUrl = `https://brandtalk.asia/gacmangre/ngan/${slug}`;
+
+  return {
+    title: `${ngan.title} — Ngăn #${ngan.number.replace('#', '')} | Gạc Măng Rê`,
+    description: ngan.short_description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${ngan.title} — Ngăn #${ngan.number.replace('#', '')}`,
+      description: ngan.short_description,
+      url: canonicalUrl,
+      images: [
+        {
+          url: ngan.hero_image,
+          width: 1200,
+          height: 630,
+          alt: ngan.title,
+        },
+      ],
+      type: 'website',
+    },
+  };
 }
 
 export default async function NganDetailPage({ params }: NganPageProps) {
@@ -138,8 +175,58 @@ export default async function NganDetailPage({ params }: NganPageProps) {
     evidence_request_note: 'GMR chỉ công bố các dữ kiện đã đối soát và ghi nhận định hướng tự nhiên từ nhà sản xuất. Tuyệt đối không tuyên bố trị liệu hay phòng ngừa bệnh y khoa.',
   };
 
+  // Machine-readable Schema.org for AI & Search crawlers
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: ngan.product?.name || ngan.title,
+    image: [heroAsset.url],
+    description: ngan.short_description,
+    sku: `GMR-${ngan.number.replace('#', '')}`,
+    brand: {
+      '@type': 'Brand',
+      name: ngan.product?.producer?.brand_name || ngan.product?.producer?.name || 'Gạc Măng Rê',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://brandtalk.asia/gacmangre/ngan/${slug}`,
+      priceCurrency: 'VND',
+      price: ngan.price,
+      availability: 'https://schema.org/PreOrder',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+    category: 'Local Artisanal Food & Provenance',
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Trang chủ',
+        item: 'https://brandtalk.asia/gacmangre',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: `Ngăn #${ngan.number.replace('#', '')}`,
+        item: `https://brandtalk.asia/gacmangre/ngan/${slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="pb-36 bg-[#FAF8F5] text-[#141211] font-sans selection:bg-[#EBDCCB]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       
       {/* 01 — MỞ NGĂN / HERO SECTION */}
       <section className="pt-8 md:pt-14 pb-10 px-4 sm:px-6 max-w-6xl mx-auto">

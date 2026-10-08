@@ -26,14 +26,14 @@ export default function DaMoPage() {
           <Archive className="w-6 h-6" />
         </div>
         <h3 className="font-serif text-xl font-bold text-[#211D1A]">
-          Ngăn #001 đang trong đợt gom đầu tiên
+          Ngăn #001 (Cacao OCA) đang trong tiến trình cùng mở mẻ
         </h3>
         <p className="text-sm text-[#5F442A] max-w-md mx-auto">
-          Hiện tại Ngăn #001 (Mật ong bạc hà Mèo Vạc) đang tiếp tục mở nhận gom. Khi mẻ đạt 100/100 phần và hoàn thành giao nhận, dữ liệu mẻ sẽ được lưu giữ tại đây.
+          Các mẻ sản vật thu hoạch thủ công chỉ hạ mẻ khi cộng đồng cùng gom đủ mốc MOQ. Sau khi hoàn thành xuất xưởng và giao nhận đến tay bạn, toàn bộ dữ liệu nhật ký mẻ sẽ được cất giữ vĩnh viễn tại đây.
         </p>
         <div className="pt-2">
           <Link
-            href="/ngan/ngan-001-mat-ong-bac-ha-ha-giang"
+            href="/ngan/cacao-oca"
             className="inline-block px-6 py-3 rounded-full bg-[#8C4A2F] text-[#FAF7F2] text-xs uppercase tracking-widest font-bold hover:bg-[#723922] transition-colors"
           >
             Xem Ngăn #001 Đang Mở

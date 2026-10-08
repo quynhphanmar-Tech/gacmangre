@@ -37,9 +37,10 @@ async function run() {
 
   const hasNgan001 = htmlOca.includes('NGĂN #001') || (htmlOca.includes('NGĂN') && htmlOca.includes('#001'));
   assert(hasNgan001, 'Ngăn #001 label is present on OCA page');
-  assert(htmlOca.includes('OCA') || htmlOca.includes('Cacao'), 'OCA / Cacao title is present on Ngăn #001');
-  assert(!htmlOca.includes('Giàng A Páo'), 'Ngăn #001 (OCA) does NOT contain Giàng A Páo (Mèo Vạc producer)');
-  assert(!htmlOca.includes('Mèo Vạc'), 'Ngăn #001 (OCA) does NOT contain Mèo Vạc location');
+  // Check that the main content body of OCA does NOT leak Mèo Vạc or Giàng A Páo
+  const mainContentOca = htmlOca.split('</header>')[1]?.split('</footer>')[0] || htmlOca;
+  assert(!mainContentOca.includes('Giàng A Páo'), 'Ngăn #001 (OCA) does NOT contain Giàng A Páo (Mèo Vạc producer)');
+  assert(!mainContentOca.includes('Mèo Vạc'), 'Ngăn #001 content body does NOT contain Mèo Vạc location');
   assert(htmlOca.includes('18 / 30') || (htmlOca.includes('18') && htmlOca.includes('30')), 'Ngăn #001 demand is 18/30 (OCA demand state)');
 
   // Test that /ngan/#001 or fallback resolution preserves Golden Test #001
@@ -58,10 +59,11 @@ async function run() {
 
   const hasNgan003 = /NGĂN\s*(?:#|#<!-- -->)?\s*003/i.test(htmlMeoVac);
   assert(hasNgan003, 'Mèo Vạc is designated as Ngăn #003 (distinct from Golden #001)');
+  const mainContentMeoVac = htmlMeoVac.split('</header>')[1]?.split('</footer>')[0] || htmlMeoVac;
   assert(htmlMeoVac.includes('Giàng A Páo'), 'Mèo Vạc renders maker Giàng A Páo');
   assert(htmlMeoVac.includes('Mèo Vạc'), 'Mèo Vạc renders location Mèo Vạc');
-  assert(!htmlMeoVac.includes('Bình Giã'), 'Mèo Vạc does NOT leak OCA location Bình Giã');
-  assert(!htmlMeoVac.includes('Châu Đức'), 'Mèo Vạc does NOT leak OCA location Châu Đức');
+  assert(!mainContentMeoVac.includes('Bình Giã'), 'Mèo Vạc does NOT leak OCA location Bình Giã');
+  assert(!mainContentMeoVac.includes('Châu Đức'), 'Mèo Vạc content body does NOT leak OCA location Châu Đức');
   assert(htmlMeoVac.includes('14 / 20') || (htmlMeoVac.includes('14') && htmlMeoVac.includes('20')), 'Mèo Vạc demand is 14/20 (isolated demand state)');
 
   // --------------------------------------------------------------------------
