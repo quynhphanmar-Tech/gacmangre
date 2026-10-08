@@ -180,7 +180,7 @@ export const mockProducts: Product[] = [
     ],
     unit: 'Hộp 250g',
     weight: '250g',
-    price: 165000,
+    price: 280000,
     ingredients: '100% Cacao nguyên chất không kiềm hóa, không pha phụ gia',
     storage: 'Bảo quản nơi khô ráo, thoáng mát, đậy kín sau khi mở nắp',
     expiry: '12 tháng kể từ ngày đóng mẻ',
@@ -284,7 +284,7 @@ export const mockNgans: Ngan[] = [
     product_id: mockProducts[0].id,
     title: 'Cacao Lên Men Thủ Công OCA',
     short_description: 'Một vùng đất đang học cách làm cacao theo cách riêng của mình. Hạt lên men thùng gỗ giữ trọn hương vị thô mộc tự nhiên.',
-    price: 165000,
+    price: 280000,
     moq: 30, // Differentiated MOQ: 30 phần
     current_quantity: 18,
     open_at: '2026-10-06T08:00:00Z',
@@ -305,8 +305,12 @@ export const mockNgans: Ngan[] = [
         asset_type: 'DOCUMENTARY',
         is_verified: true,
         caption: 'Hạt cacao Trinitario lên men thùng gỗ tại xưởng Bình Giã, Châu Đức',
-        credit: 'Ảnh: Tư liệu OCA Cacao',
+        credit: 'Ảnh: Tư liệu thực địa OCA Cacao',
         slot: 'hero',
+        source_type: 'FIELD_EXPEDITION',
+        provenance_level: 1, // Thực địa trực tiếp
+        license: 'GacMangRe Field Archive',
+        approved: true,
       },
       {
         id: 'asset-oca-hands',
@@ -319,6 +323,10 @@ export const mockNgans: Ngan[] = [
         caption: 'Đảo hạt định kỳ 2 ngày một lần để kiểm soát nhiệt độ khối ủ',
         credit: 'Ảnh: Thực địa Châu Đức',
         slot: 'hands',
+        source_type: 'FIELD_EXPEDITION',
+        provenance_level: 1, // Thực địa
+        license: 'GacMangRe Field Archive',
+        approved: true,
       },
       {
         id: 'asset-oca-place',
@@ -331,6 +339,10 @@ export const mockNgans: Ngan[] = [
         caption: 'Vườn cacao xen canh dưới tán điều tại Châu Đức',
         credit: 'Ảnh: OCA Cacao',
         slot: 'place',
+        source_type: 'OFFICIAL_PRODUCER',
+        provenance_level: 2, // Official producer
+        license: 'Producer Authorized',
+        approved: true,
       },
       {
         id: 'asset-oca-texture',
@@ -343,6 +355,10 @@ export const mockNgans: Ngan[] = [
         caption: 'Bột cacao thô mộc không kiềm hóa, hàm lượng bơ tự nhiên >18%',
         credit: 'Ảnh: OCA Lab',
         slot: 'texture',
+        source_type: 'OFFICIAL_PRODUCER',
+        provenance_level: 2, // Official producer
+        license: 'Producer Authorized',
+        approved: true,
       },
     ],
     story_object: {

@@ -56,7 +56,7 @@ async function run() {
   assert(resMeoVac.status === 200, 'Mèo Vạc Ngăn returns 200 OK');
   const htmlMeoVac = await resMeoVac.text();
 
-  const hasNgan003 = htmlMeoVac.includes('NGĂN #003') || (htmlMeoVac.includes('NGĂN') && htmlMeoVac.includes('#003'));
+  const hasNgan003 = /NGĂN\s*(?:#|#<!-- -->)?\s*003/i.test(htmlMeoVac);
   assert(hasNgan003, 'Mèo Vạc is designated as Ngăn #003 (distinct from Golden #001)');
   assert(htmlMeoVac.includes('Giàng A Páo'), 'Mèo Vạc renders maker Giàng A Páo');
   assert(htmlMeoVac.includes('Mèo Vạc'), 'Mèo Vạc renders location Mèo Vạc');

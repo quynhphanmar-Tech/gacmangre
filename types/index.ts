@@ -61,7 +61,54 @@ export interface MediaAsset {
   alt_text: string;            // Mô tả ảnh trợ năng & SEO
   caption?: string;            // Chú thích chân thực
   slot?: 'hero' | 'hands' | 'landscape' | 'place' | 'process' | 'texture' | 'producer';
+  story_object_id?: string;
+  source_type?: 'FIELD_EXPEDITION' | 'OFFICIAL_PRODUCER' | 'PRODUCER_PROVIDED' | 'EDITORIAL' | 'AI_ILLUSTRATION';
+  provenance_level?: 1 | 2 | 3 | 4; // 1: Chị đi thực địa, 2: Official producer, 3: Producer provided, 4: Editorial/AI
+  truth_status?: 'VERIFIED' | 'PRODUCER_CLAIM' | 'EDITORIAL_INTERPRETATION' | 'MISSING_EVIDENCE' | 'UNKNOWN';
+  approved?: boolean;
   created_at?: string;
+}
+
+export interface NganContentConfig {
+  id: string;
+  ngan_id: string;
+  story_object_id: string;
+  product_id: string;
+  hero_asset_id?: string;
+  gallery_asset_ids?: string[];
+  headline_override?: string;
+  subheadline_override?: string;
+  value_items?: {
+    id: string;
+    title: string;
+    description: string;
+    icon?: string;
+  }[];
+  health_content_ref?: {
+    headline: string;
+    description: string;
+    allowed_claims: string[];
+    truth_status: 'PRODUCER_CLAIM' | 'EDITORIAL_INTERPRETATION';
+    evidence_request_note?: string;
+  };
+  trust_items?: {
+    id: string;
+    label: string;
+    value: string;
+    status: 'VERIFIED' | 'PRODUCER_CLAIM' | 'UNKNOWN' | 'MISSING_EVIDENCE';
+    evidence_id?: string;
+  }[];
+  cta_config?: {
+    primary_text: string;
+    secondary_text?: string;
+    target_slug?: string;
+  };
+  display_order?: string[];
+  status: 'DRAFT' | 'APPROVED' | 'PUBLISHED';
+  approved_by?: string;
+  approved_at?: string;
+  version: string;
+  updated_at?: string;
 }
 
 export type LocationRole =
@@ -141,9 +188,10 @@ export interface Product {
 export interface CanonicalEvidenceItem {
   id: string;
   claim: string;
-  source_id: string;
-  source_url: string;
+  source_id?: string;
+  source_url?: string;
   source_type: string;
+  source_title?: string;
   truth_status: 'VERIFIED' | 'PRODUCER_CLAIM' | 'EDITORIAL_INTERPRETATION' | 'MISSING_EVIDENCE' | 'UNKNOWN';
   confidence?: number;
   evidence_type?: string;
@@ -196,6 +244,7 @@ export interface Ngan {
   media_assets?: MediaAsset[];
   story_object?: StoryObject;
   demand_state?: DemandState;
+  content_config?: NganContentConfig;
   selection_dat: string;
   selection_nguoi: string;
   selection_vi: string;
@@ -811,6 +860,7 @@ export type TruthStatus =
   | 'VERIFIED'
   | 'PRODUCER_CLAIM'
   | 'EDITORIAL_INTERPRETATION'
+  | 'MISSING_EVIDENCE'
   | 'UNKNOWN';
 
 export interface TruthClaimItem {
