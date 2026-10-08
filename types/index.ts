@@ -1439,6 +1439,51 @@ export interface InternalMarketLearningRecord {
   created_at: string;
 }
 
+// ==============================================================================
+// HUMAN VERIFICATION GATE & WORKFLOW TYPES (Story Intelligence Test #002)
+// Does NOT mutate core TruthStatus enum ('VERIFIED' | 'PRODUCER_CLAIM' | etc.)
+// ==============================================================================
 
+export type VerificationWorkflowState =
+  | 'PENDING'
+  | 'NEEDS_HUMAN_VERIFICATION'
+  | 'VERIFIED'
+  | 'REJECTED';
 
+export type VerificationMethod =
+  | 'FIELD_VISIT'
+  | 'PRIVATE_DOCUMENT'
+  | 'LAB_TEST_REPORT'
+  | 'PRODUCER_INTERVIEW'
+  | 'OFFICIAL_REGISTRY'
+  | 'EDITORIAL_AUDIT';
 
+export interface HumanVerificationRecord {
+  id: string;
+  claim_id: string;
+  producer_id?: string;
+  verification_state: VerificationWorkflowState;
+  verified_by: string;
+  verified_at: string;
+  verification_method: VerificationMethod;
+  evidence_reference: string;
+  verification_note: string;
+  previous_truth_status: TruthStatus;
+  resulting_truth_status: TruthStatus;
+}
+
+export interface VerifiableClaimItem {
+  id: string;
+  claim: string;
+  source_id?: string;
+  source_url?: string;
+  source_type: string;
+  source_title?: string;
+  ai_truth_status: TruthStatus;
+  ai_confidence: number;
+  ai_rationale: string;
+  is_public_evidence: boolean;
+  verification_state: VerificationWorkflowState;
+  current_truth_status: TruthStatus;
+  audit_trail?: HumanVerificationRecord[];
+}
