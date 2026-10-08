@@ -62,12 +62,46 @@ export interface MediaAsset {
   created_at: string;
 }
 
+export type LocationRole =
+  | 'PRODUCER_LOCATION'
+  | 'RAW_MATERIAL_ORIGIN'
+  | 'PROCESSING_LOCATION'
+  | 'STORY_LOCATION'
+  | 'MARKET_LOCATION';
+
+export interface CanonicalLocationEntity {
+  id: string;
+  name: string;
+  role: LocationRole;
+  province?: string;
+  district?: string;
+  commune?: string;
+  address_detail?: string;
+  evidence_id?: string;
+  truth_status: 'VERIFIED' | 'PRODUCER_CLAIM' | 'UNKNOWN';
+  source_url?: string;
+  notes?: string;
+}
+
+export type OrderIntention = 'PERSONAL' | 'GIFT';
+
+export interface StoryCardSpec {
+  batch_code: string;
+  product_name: string;
+  maker_name: string;
+  origin_name: string;
+  story_excerpt: string;
+  truth_badge: 'VERIFIED FACT' | 'PRODUCER CLAIM';
+  evidence_summary: string;
+}
+
 export interface Producer {
   id: string;
   name: string;
   slug: string;
   brand_name: string;
   location: string;
+  canonical_locations?: CanonicalLocationEntity[];
   description: string;
   story: string;
   avatar: string;
@@ -88,6 +122,7 @@ export interface Product {
   category?: string;
   description: string;
   origin: string;
+  canonical_locations?: CanonicalLocationEntity[];
   unit: string;
   weight: string;
   price: number;
@@ -180,6 +215,9 @@ export interface Order {
   utm_content?: string;
   landing_url?: string;
   idempotency_key?: string;
+  intention?: OrderIntention;
+  gift_note?: string;
+  story_card?: StoryCardSpec;
   created_at: string;
   updated_at: string;
   customer?: Customer;
@@ -355,6 +393,8 @@ export interface OrderInput {
   utm_content?: string;
   landing_url?: string;
   idempotency_key?: string;
+  intention?: OrderIntention;
+  gift_note?: string;
 }
 
 export interface OrderCreationResult {

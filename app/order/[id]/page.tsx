@@ -61,11 +61,54 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
             <span className="text-[#665E58]">Số lượng</span>
             <span className="font-semibold text-[#141211]">{order.quantity} phần</span>
           </div>
+          <div className="flex justify-between py-1.5 border-b border-[#E7DFD3]/60">
+            <span className="text-[#665E58]">Mục đích</span>
+            <span className="font-semibold text-[#141211]">
+              {order.intention === 'GIFT' ? 'Làm quà tặng (Kèm Thẻ câu chuyện)' : 'Dùng cho mình'}
+            </span>
+          </div>
+          {order.gift_note && (
+            <div className="py-2 border-b border-[#E7DFD3]/60">
+              <span className="text-[#665E58] block mb-1">Lời chúc đính kèm:</span>
+              <p className="p-3 rounded-xl bg-white border border-[#E7DFD3] text-xs font-serif italic text-[#423B36]">
+                &ldquo;{order.gift_note}&rdquo;
+              </p>
+            </div>
+          )}
           <div className="flex justify-between py-1.5">
             <span className="text-[#665E58]">Tổng</span>
             <span className="font-serif font-bold text-base text-[#141211]">{formattedTotal}</span>
           </div>
         </div>
+
+        {/* THẺ CÂU CHUYỆN SẢN VẬT (STORY CARD) */}
+        {order.story_card && (
+          <div className="p-6 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E7DFD3]">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-[#A65F25] font-bold">
+                THẺ CÂU CHUYỆN SẢN VẬT ĐÍNH KÈM
+              </span>
+              <span className="text-[10px] font-mono text-[#665E58]">{order.story_card.batch_code}</span>
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-serif text-base font-bold text-[#141211]">
+                {order.story_card.product_name}
+              </h3>
+              <p className="text-xs text-[#665E58] font-sans">
+                {order.story_card.maker_name} · {order.story_card.origin_name}
+              </p>
+            </div>
+            <p className="text-xs font-serif italic text-[#423B36] leading-relaxed bg-white p-3 rounded-xl border border-[#E7DFD3]">
+              &ldquo;{order.story_card.story_excerpt}&rdquo;
+            </p>
+            <div className="flex items-center justify-between text-[10px] text-[#665E58] font-mono pt-1">
+              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+                {order.story_card.truth_badge}
+              </span>
+              <span>{order.story_card.evidence_summary}</span>
+            </div>
+          </div>
+        )}
 
         {/* Tiến trình mở Ngăn */}
         <div className="p-6 rounded-2xl bg-[#FAF8F5] border border-[#E7DFD3] space-y-4">

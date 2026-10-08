@@ -30,6 +30,10 @@ export default function OrderFormPage() {
 
   // Form Fields
   const [quantity, setQuantity] = useState(1);
+  const [intention, setIntention] = useState<'PERSONAL' | 'GIFT'>(
+    searchParams.get('intent') === 'GIFT' ? 'GIFT' : 'PERSONAL'
+  );
+  const [giftNote, setGiftNote] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [zalo, setZalo] = useState('');
@@ -115,6 +119,8 @@ export default function OrderFormPage() {
           province,
           quantity,
           ngan_id: currentNgan.id,
+          intention,
+          gift_note: intention === 'GIFT' ? (giftNote.trim() || undefined) : undefined,
           note: note.trim() || undefined,
           source: searchParams.get('source') || 'DIRECT_WEB',
           utm_source: searchParams.get('utm_source') || undefined,
@@ -220,6 +226,60 @@ export default function OrderFormPage() {
               </span>
             </div>
           </div>
+
+          {/* Intention Selector: Personal vs Gift */}
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-pantryst font-semibold text-[#423B36] block">
+              Mục đích cùng mở:
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setIntention('PERSONAL')}
+                className={`p-3.5 rounded-xl border text-left transition ${
+                  intention === 'PERSONAL'
+                    ? 'border-[#141211] bg-[#141211] text-white shadow-sm'
+                    : 'border-[#E7DFD3] bg-[#FAF8F5] text-[#423B36] hover:border-[#141211]'
+                }`}
+              >
+                <strong className="block text-xs uppercase tracking-wider">Dùng cho mình</strong>
+                <span className={`text-[10px] block ${intention === 'PERSONAL' ? 'text-white/80' : 'text-[#665E58]'}`}>
+                  Thưởng thức nguyên bản
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIntention('GIFT')}
+                className={`p-3.5 rounded-xl border text-left transition ${
+                  intention === 'GIFT'
+                    ? 'border-[#A65F25] bg-[#A65F25] text-white shadow-sm'
+                    : 'border-[#E7DFD3] bg-[#FAF8F5] text-[#423B36] hover:border-[#A65F25]'
+                }`}
+              >
+                <strong className="block text-xs uppercase tracking-wider">Làm quà tặng</strong>
+                <span className={`text-[10px] block ${intention === 'GIFT' ? 'text-white/80' : 'text-[#665E58]'}`}>
+                  Kèm Thẻ câu chuyện
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Optional Gift Note if GIFT */}
+          {intention === 'GIFT' && (
+            <div className="space-y-2 p-4 rounded-xl bg-[#FFF9F2] border border-[#F0DCB8]">
+              <label htmlFor="gift-note" className="text-xs uppercase tracking-pantryst font-semibold text-[#A65F25] block">
+                Lời chúc / Ghi chú gửi người nhận quà (in lên Thẻ câu chuyện):
+              </label>
+              <textarea
+                id="gift-note"
+                rows={2}
+                value={giftNote}
+                onChange={(e) => setGiftNote(e.target.value)}
+                placeholder="Ví dụ: Gửi bạn mẻ cacao mộc ấm lành đầu đông từ Gạc Măng Rê..."
+                className="w-full px-4 py-2.5 rounded-xl border border-[#E7DFD3] bg-white text-sm text-[#141211] focus:outline-none focus:border-[#A65F25] transition"
+              />
+            </div>
+          )}
 
           {/* Full Name */}
           <div className="space-y-2">

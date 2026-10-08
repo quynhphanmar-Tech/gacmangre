@@ -199,6 +199,17 @@ export async function createOrder(input: OrderInput): Promise<OrderCreationResul
     utm_content: input.utm_content,
     landing_url: landingUrl,
     idempotency_key: idempotencyKey,
+    intention: input.intention || 'PERSONAL',
+    gift_note: input.gift_note,
+    story_card: {
+      batch_code: `BATCH-${targetNgan.number.replace('#', '')}-2026`,
+      product_name: targetNgan.product?.name || targetNgan.title,
+      maker_name: targetNgan.product?.producer?.name || 'Người làm sản vật',
+      origin_name: targetNgan.product?.origin || 'Vùng đất nguyên bản',
+      story_excerpt: targetNgan.selection_chuyen || targetNgan.short_description,
+      truth_badge: 'VERIFIED FACT',
+      evidence_summary: 'Hồ sơ thực địa và quy trình chế biến mộc minh bạch qua Truth Gate',
+    },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     customer: {

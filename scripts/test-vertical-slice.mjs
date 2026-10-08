@@ -39,7 +39,8 @@ async function runTests() {
 
   // Phase 1: 12 Sections check on OCA
   assert(ocaHtml.includes('Cacao Lên Men Thủ Công OCA') || ocaHtml.includes('Cacao'), '01. Hero: Title present');
-  assert(ocaHtml.includes('VÌ SAO CHỌN SẢN VẬT NÀY') && ocaHtml.includes('Chợ Gạo'), '02. Why This present');
+  assert(ocaHtml.includes('VÌ SAO CHỌN SẢN VẬT NÀY') && ocaHtml.includes('Châu Đức'), '02. Why This present with canonical Chau Duc origin');
+  assert(!ocaHtml.includes('Chợ Gạo'), '02. Regression REG-LOCATION-001: Cho Gao contamination eradicated from OCA');
   assert(ocaHtml.includes('VÙNG ĐẤT'), '03. Place present');
   assert(ocaHtml.includes('NGƯỜI LÀM'), '04. Maker present');
   assert(ocaHtml.includes('MAKING PROCESS') && (ocaHtml.includes('ĐÔI TAY') || ocaHtml.includes('quy trình')), '05. Making present');
@@ -50,7 +51,7 @@ async function runTests() {
   assert(ocaHtml.includes('THÔNG TIN MẺ'), '10. Product / batch present');
   assert(ocaHtml.includes('KỲ VỌNG VẬN HÀNH & GIAO HÀNG') || ocaHtml.includes('PRODUCER SHIPS DIRECT'), '11. Fulfillment expectation (Model A: Producer Ships Direct) present');
   assert(ocaHtml.includes('LÝ DO GẠC MĂNG RÊ MỞ NGĂN NÀY'), '12. GMR reason for opening present');
-  assert(ocaHtml.includes('CÙNG MỞ NGĂN'), 'CTA derived correctly from OPEN status');
+  assert(ocaHtml.includes('CÙNG MỞ MẺ') || ocaHtml.includes('CÙNG MỞ NGĂN'), 'CTA derived correctly from OPEN status');
 
   // Phase 2: Demand -> Preorder Form -> Create Order
   console.log('\n  📦 Phase 2: Preorder & Order Creation for OCA...');
