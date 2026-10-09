@@ -74,8 +74,8 @@ async function runLocationIntegrityTests() {
     const res = await fetch(`${BASE_URL}/ngan/cacao-oca`);
     const html = await res.text();
     assert(html.includes('Dùng cho mình'), 'Must feature Dùng cho mình button');
-    assert(html.includes('Làm quà tặng'), 'Must feature Làm quà tặng button');
-    assert(html.includes('THẺ CÂU CHUYỆN SẢN VẬT'), 'Must feature Story Card component');
+    assert(html.includes('Làm quà biếu') || html.includes('Làm quà tặng'), 'Must feature Làm quà biếu/tặng button');
+    assert(html.includes('Thẻ câu chuyện sản vật') || html.includes('THẺ CÂU CHUYỆN SẢN VẬT'), 'Must feature Story Card component');
   });
 
   // ----------------------------------------------------------------------------
@@ -106,7 +106,7 @@ async function runLocationIntegrityTests() {
     const res = await fetch(`${BASE_URL}/ngan/mat-ong-bac-ha-meo-vac`);
     const html = await res.text();
     assert(html.includes('Nguồn gốc'), 'Must render early Trust Strip');
-    assert(html.includes('THẺ CÂU CHUYỆN SẢN VẬT'), 'Must feature Story Card');
+    assert(html.includes('Thẻ câu chuyện sản vật') || html.includes('THẺ CÂU CHUYỆN SẢN VẬT'), 'Must feature Story Card');
   });
 
   // ----------------------------------------------------------------------------
