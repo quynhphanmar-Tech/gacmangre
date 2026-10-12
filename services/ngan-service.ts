@@ -15,6 +15,26 @@ export async function getNganBySlug(slug: string): Promise<Ngan | null> {
   };
   const targetSlug = slugAliases[normalized] || normalized;
 
+  // 1. Live database branch: when Supabase is configured, query by targetSlug
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('ngans')
+      .select(`
+        *,
+        product:products(
+          *,
+          producer:producers(*)
+        )
+      `)
+      .eq('slug', targetSlug)
+      .single();
+
+    if (!error && data) {
+      return data as Ngan;
+    }
+  }
+
+  // 2. Mock fallback branch: zero-failure fallback
   const mockFound = mockNgans.find(
     (n) =>
       n.slug.toLowerCase() === targetSlug ||
@@ -28,27 +48,7 @@ export async function getNganBySlug(slug: string): Promise<Ngan | null> {
     return mockFound;
   }
 
-  if (!isSupabaseConfigured || !supabase) {
-    return mockNgans[0] || mockNgan001;
-  }
-
-  const { data, error } = await supabase
-    .from('ngans')
-    .select(`
-      *,
-      product:products(
-        *,
-        producer:producers(*)
-      )
-    `)
-    .eq('slug', targetSlug)
-    .single();
-
-  if (error || !data) {
-    return mockNgans[0] || mockNgan001;
-  }
-
-  return data as Ngan;
+  return mockNgans[0] || mockNgan001;
 }
 
 export async function getActiveNgans(): Promise<Ngan[]> {
