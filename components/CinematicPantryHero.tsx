@@ -103,9 +103,6 @@ export default function CinematicPantryHero({ pilotNgans, goldenStory }: Cinemat
                       <span className="px-3 py-1 rounded-full bg-[#141211] text-[#FAF8F5] font-mono text-[10px] tracking-widest uppercase">
                         NGĂN #001
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        GOLDEN TEST
-                      </span>
                     </div>
 
                     <div className="relative aspect-[16/10] rounded-xl overflow-hidden border border-[#E7DFD3] bg-[#F3EDE2]">

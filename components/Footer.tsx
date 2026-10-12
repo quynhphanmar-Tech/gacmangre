@@ -13,7 +13,7 @@ export default function Footer() {
               &ldquo;Có những thứ ngon không dễ tìm. Có những người làm rất tử tế nhưng ít người biết đến. Gạc Măng Rê đi tìm họ. Cất vị quê nhà.&rdquo;
             </p>
             <p className="text-xs text-[#9E7B54] uppercase tracking-widest">
-              Định vị: Curation Moat · Không phải sàn thương mại điện tử
+              Không phải sàn thương mại điện tử · Tuyển chọn sản vật nguyên bản
             </p>
           </div>
 
@@ -58,10 +58,7 @@ export default function Footer() {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9E7B54]">
           <p>© 2026 Gạc Măng Rê. Mọi quyền được bảo lưu.</p>
           <div className="flex gap-6 mt-4 sm:mt-0">
-            <Link href="/admin" className="hover:text-[#D6BFA0] transition">
-              Quản trị đơn P0
-            </Link>
-            <span>Phiên bản MVP Golden Sample 1.0</span>
+            <span>A Digital Pantry of Vietnam</span>
           </div>
         </div>
       </div>

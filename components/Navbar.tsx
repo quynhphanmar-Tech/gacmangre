@@ -108,13 +108,6 @@ export default function Navbar() {
               <span>VỀ GẠC MĂNG RÊ</span>
               <ArrowUpRight className="w-4 h-4 text-[#665E58]" />
             </Link>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-xs text-[#665E58] pt-2"
-            >
-              Trang Quản Trị P0
-            </Link>
           </nav>
         </div>
       )}
