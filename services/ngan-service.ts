@@ -41,7 +41,7 @@ export async function getNganBySlug(slug: string): Promise<Ngan | null> {
         producer:producers(*)
       )
     `)
-    .eq('slug', slug)
+    .eq('slug', targetSlug)
     .single();
 
   if (error || !data) {
